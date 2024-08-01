@@ -14,18 +14,11 @@ class IconImageViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var allowTapping: Bool = false
     
-    private var imageSubscription: AnyCancellable?
-    private let icon: IconModel
-    private let fileManager = LocalFileManager.instance
-    private let folderName = "icon_images"
-    private var imageUrls: [String] = []
-    private var currentIndex = 0
     private var cancellables = Set<AnyCancellable>()
     private let dataService: IconImageDataService
     
     
     init(icon: IconModel) {
-        self.icon = icon
         self.isLoading = true
         self.dataService = IconImageDataService(urlString: icon.image, icon: icon)
         self.addSubscribers()

@@ -10,32 +10,29 @@ import SwiftUI
 struct GroupedSaintImageView: View {
     @EnvironmentObject private var vm: OccasionsViewModel
     @Binding var selectedSaint: IconModel?
-    @Binding var showStory: Bool?
-    @State private var showGDView: Bool = false
-    var namespace: Namespace.ID
+    @Binding var showStory: Bool
     
     var body: some View {
         ZStack {
-            ForEach(Array(vm.filteredIcons.enumerated()), id: \.element.id) { index, saint in
+            ForEach(Array(vm.filteredIcons.enumerated()), id: \.element.id) { index, icon in
                 let reversedIndex = vm.filteredIcons.count - index - 1
-                HomeSaintImageView(namespace: namespace, icon: saint)
-                    .transition(.scale(scale: 1))
+                HomeSaintImageView(icon: icon)
                     .offset(y: CGFloat(reversedIndex) * -70)
                     .scaleEffect(0.98 - (CGFloat(reversedIndex) * 0.15), anchor: .bottom)
                     .allowsHitTesting(vm.disallowTapping ? false : true)
                     .contextMenu(ContextMenu(menuItems: {
                         Button {
-                            selectedSaint = saint
-                            showStory?.toggle()
+                            selectedSaint = icon
+                            showStory.toggle()
                         } label: {
-                            if vm.getStory(forIcon: saint) != nil {
+                            if vm.getStory(forIcon: icon) != nil {
                                 Label("See story", systemImage: "book")
                             } else {
                                 Text("No story")
                             }
                             
                         }
-                        .disabled((vm.getStory(forIcon: saint) != nil) == true ? false : true)
+                        .disabled((vm.getStory(forIcon: icon) != nil) == true ? false : true)
 
                     }))
                     .onTapGesture {
@@ -54,18 +51,14 @@ struct GroupedSaintImageView: View {
             }
         }
     }
-    private func gdSegue(icon: IconModel) {
-        selectedSaint = icon
-        showGDView.toggle()
-    }
 }
 
 struct GroupedSaintImageView_Previews: PreviewProvider {
-    @State static var showStory: Bool? = false
-    @Namespace static var namespace
+    @State static var selectedSaint: IconModel? = nil
+    @State static var showStory: Bool = false
     
     static var previews: some View {
-        GroupedSaintImageView(selectedSaint: .constant(dev.icon), showStory: $showStory, namespace: namespace)
+        GroupedSaintImageView(selectedSaint: $selectedSaint, showStory: $showStory)
             .environmentObject(OccasionsViewModel())
     }
 }

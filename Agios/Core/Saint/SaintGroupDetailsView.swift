@@ -7,27 +7,6 @@
 
 import SwiftUI
 
-struct GroupedDetailLoadingView: View {
-    @State var icon: IconModel?
-    let story: Story
-    @State private var showImageViewer = false
-    @Binding var selectedSaint: IconModel?
-    var namespace: Namespace.ID
-    
-    var body: some View {
-        if let icon = icon {
-            SaintGroupDetailsView(
-                icon: icon,
-                iconographer: dev.iconagrapher,
-                stories: story,
-                showImageViewer: $showImageViewer,
-                selectedSaint: $selectedSaint, 
-                namespace: namespace
-            )
-        }
-    }
-}
-
 struct SaintGroupDetailsView: View {
     
     @EnvironmentObject private var occasionViewModel: OccasionsViewModel
@@ -35,8 +14,7 @@ struct SaintGroupDetailsView: View {
     let iconographer: Iconagrapher
     let stories: Story
     @Binding var showImageViewer: Bool
-    @Binding var selectedSaint: IconModel?
-    @State var setSaint: IconModel? = nil
+    @Binding var selectedSaints: IconModel?
     var namespace: Namespace.ID
     
     @State private var offset: CGSize = .zero
@@ -50,20 +28,10 @@ struct SaintGroupDetailsView: View {
     @State private var currentScale: CGFloat = 1.0
     @State private var descriptionHeight: Int = 3
     @State private var storyHeight: Int = 6
-    @State private var openSheet: Bool? = false
-    @State private var appear: Bool = false
-    @StateObject private var viewModel: IconImageViewModel
+    @State private var openSheet: Bool = false
+    @State private var selectedImage: UIImage?
+    @EnvironmentObject var viewModel: IconImageViewModel
     @Environment(\.presentationMode) var presentationMode
-    
-    init(icon: IconModel, iconographer: Iconagrapher, stories: Story, showImageViewer: Binding<Bool>, selectedSaint: Binding<IconModel?>, namespace: Namespace.ID) {
-        _viewModel = StateObject(wrappedValue: IconImageViewModel(icon: icon))
-        self.iconographer = iconographer
-        self.stories = stories
-        self._showImageViewer = showImageViewer
-        self._selectedSaint = selectedSaint
-        self.namespace = namespace
-        self.icon = icon
-    }
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -88,46 +56,41 @@ struct SaintGroupDetailsView: View {
                         //highlights
                     }
                     .kerning(-0.4)
-                    .padding(.bottom, 40)
-                    .padding(.top, 118)
+                    .padding(.vertical, 24)
                     .fontDesign(.rounded)
                     .foregroundStyle(.gray900)
+                    .padding(.top, 56)
                     
                 }
-                .overlay(alignment: .top) {
-                    ZStack(alignment: .leading) {
-                        VariableBlurView(maxBlurRadius: 15, direction: .blurredTopClearBottom, startOffset: 0)
-                            .blur(radius: 3)
-                            .frame(height: 102)
-                            .ignoresSafeArea()
-                        customBackButton
-                    }
-                    
-                }
-
                     blurredOverlay
                     filledImageView
                 
    
             }
-            
+            .background(
+                RoundedRectangle(cornerRadius: 32, style: .continuous)
+                    .fill(.primary100)
+                    .ignoresSafeArea()
+            )
+            .mask {
+                RoundedRectangle(cornerRadius: 32, style: .continuous)
+                    .ignoresSafeArea()
+        }
            closeButton
         }
-        .halfSheet(showSheet: $openSheet) {
+        .overlay(alignment: .topLeading, content: {
+            customBackButton
+        })
+        .sheet(isPresented: $openSheet) {
             StoryDetailView(story: stories)
-                .environmentObject(occasionViewModel)
-        } onDismiss: {}
-        .onAppear {
-            selectedSaint = nil
         }
-        .background(
-            RoundedRectangle(cornerRadius: 32, style: .continuous)
-                .fill(.primary100)
-        )
-        .mask {
-            RoundedRectangle(cornerRadius: 32, style: .continuous)
-    }
-        //.ignoresSafeArea(.all)
+        .onAppear {
+            withAnimation {
+                selectedSaints = nil
+                showImageViewer = false
+            }
+           
+        }
     }
     
     private func getScaleAmount() -> CGFloat {
@@ -138,9 +101,9 @@ struct SaintGroupDetailsView: View {
         
         // Check if the scale amount is below a certain threshold
         if scaleAmount < 0.4 {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
                 //showImageViewer = false
-                selectedSaint = nil
+                selectedSaints = nil
             }
         }
          
@@ -170,8 +133,10 @@ struct SaintGroupDetailsView_Preview: PreviewProvider {
     @Namespace static var namespace
     
     static var previews: some View {
-        SaintGroupDetailsView(icon: dev.icon, iconographer: dev.iconagrapher, stories: dev.story, showImageViewer: .constant(false), selectedSaint: .constant(dev.icon), namespace: namespace)
-            .environmentObject(dev.occasionsViewModel)
+        SaintGroupDetailsView(icon: dev.icon, iconographer: dev.iconagrapher, stories: dev.story, showImageViewer: .constant(false), selectedSaints: .constant(dev.icon), namespace: namespace)
+            .environmentObject(OccasionsViewModel())
+            .environmentObject(IconImageViewModel(icon: dev.icon))
+            .environmentObject(ImageViewerViewModel())
     }
 }
 
@@ -196,29 +161,24 @@ extension SaintGroupDetailsView {
             } label: {
                 NavigationButton(labelName: .back, backgroundColor: .primary300, foregroundColor: .primary1000)
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 4)
-            .opacity(showImageViewer ? 0 : 1)
+            .padding(20)
+            .opacity(selectedSaints != nil ? 0 : 1)
         }
         .opacity(getScaleAmount() < 1 || currentScale > 1 ? 0 : 1)
         .zIndex(showImageViewer ? -2 : 0)
-        .offset(y: 23)
     }
     
         
     private var closeButton: some View {
         ZStack {
             Button {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
-                    //selectedSaints = nil
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
+                    selectedSaints = nil
                     endValue = 0
                     startValue = min(max(startValue, 0), 0.2)
                     showImageViewer = false
                     offset = .zero
-                    
                 }
-                selectedSaint = nil
-                setSaint = nil
                 
             } label: {
                 NavigationButton(labelName: .close, backgroundColor: .primary300, foregroundColor: .primary1000)
@@ -228,72 +188,77 @@ extension SaintGroupDetailsView {
             .opacity(showImageViewer ? 1 : 0)
         }
         .opacity(getScaleAmount() < 1 || currentScale > 1 ? 0 : 1)
-        //.zIndex(selectedSaints != nil ? 0 : -2)
-        .zIndex(showImageViewer ? 0 : -2)
-        .offset(y: 40)
+        .zIndex(selectedSaints != nil ? 0 : -2)
 
     }
     private var filledImageView: some View {
         ZStack {
             if showImageViewer {
-                VStack {}
-                .frame(maxWidth: .infinity)
-                .frame(maxHeight: .infinity)
-                .background(
-                    SaintGroupImageView(icon: setSaint ?? dev.icon)
-                        .matchedGeometryEffect(id: "\(setSaint?.id ?? "")", in: namespace)
-                        .scaledToFit()
-                        .transition(.scale(scale: 1))
-                        .zoomable()
-                        .onTapGesture {
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
-                                showImageViewer = true
-                            }
-                        }
-                    .scaleEffect(1 + startValue)
-                    .offset(x: startValue > 0.2 ? offset.width + position.width : .zero, y: startValue > 0 ? offset.height + position.height : .zero)
-                    .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("MagnifyGestureScaleChanged"))) { obj in
-                            if let scale = obj.object as? CGFloat {
-                                withAnimation {
-                                    currentScale = scale
-                                }
-                                
-                            }
-                        }
-                        .offset(offset)
-                        .scaleEffect(getScaleAmount())
-                        .simultaneousGesture(
-                            currentScale <= 1 ?
-                            DragGesture()
-                                .onChanged({ value in
-                                    if startValue <= 0 {
-                                        withAnimation {
-                                            offset = value.translation
+                RoundedRectangle(cornerRadius: 25.0)
+                    .fill(.clear)
+                    .background(
+                        ZStack(content: {
+                            
+                            if let image = viewModel.image {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .zoomable()
+                                    .matchedGeometryEffect(id: "\(selectedSaints?.id ?? "")", in: namespace)
+                                    .zIndex(10)
+                                    //.transition(.scale(scale: 1))
+                                    .onTapGesture {
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
+                                            //showImageViewer = true
                                         }
                                     }
-                                    
-                                })
-                                .onEnded({ value in
-                                    let dragThreshold: CGFloat = 100
-                                    
-                                    if abs(value.translation.height) > dragThreshold {
-                                        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
-                                            showImageViewer = false
-                                            //occasionViewModel.viewState = .expanded
-                                            //selectedSaints = nil
-                                            offset = .zero
-                                            HapticsManager.instance.impact(style: .light)
-                                        }
-                                    } else {
-                                        withAnimation(.spring(response: 0.30, dampingFraction: 1)) {
-                                            offset = .zero
+                                .scaleEffect(1 + startValue)
+                                .offset(x: startValue > 0.2 ? offset.width + position.width : .zero, y: startValue > 0 ? offset.height + position.height : .zero)
+                                .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("MagnifyGestureScaleChanged"))) { obj in
+                                        if let scale = obj.object as? CGFloat {
+                                            withAnimation {
+                                                currentScale = scale
+                                            }
+                                            
                                         }
                                     }
-                                })
-                            : nil
-                        )
-                )
-                .offset(.zero)
+                            }
+                            //.offset(offset)
+                        })
+                        
+                            .offset(offset)
+                            .scaleEffect(getScaleAmount())
+                            //.transition(.scale(scale: 1))
+                            .simultaneousGesture(
+                                currentScale <= 1 ?
+                                DragGesture()
+                                    .onChanged({ value in
+                                        if startValue <= 0 {
+                                            withAnimation {
+                                                offset = value.translation
+                                            }
+                                        }
+                                        
+                                    })
+                                    .onEnded({ value in
+                                        if startValue <= 0 {
+                                            withAnimation(.spring(response: 0.30, dampingFraction: 1)) {
+                                                offset = .zero
+                                            }
+                                            
+                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
+                                                //self.selectedSaints = nil
+                                                HapticsManager.instance.impact(style: .light)
+                                                showImageViewer = false
+                                                selectedSaints = nil
+                                            }
+                                        }
+                                    })
+                                : nil
+                            )
+                    )
+                    .offset(.zero)
+                    //.matchedGeometryEffect(id: "newBound", in: namespace)
 
             }
 
@@ -307,14 +272,13 @@ extension SaintGroupDetailsView {
                 .zIndex(10)
                 .ignoresSafeArea()
                 .onTapGesture {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
                         //self.selectedSaints = nil
                         endValue = 0
                         startValue = 0
                         showImageViewer = false
+                        selectedSaints = nil
                     }
-                    selectedSaint = nil
-                    setSaint = nil
             }
                 .allowsHitTesting(startValue > 0 ? false : true)
         }
@@ -389,7 +353,7 @@ extension SaintGroupDetailsView {
                         .lineLimit(storyHeight)
                     
                     Button {
-                        openSheet?.toggle()
+                        openSheet.toggle()
                     } label: {
                         HStack(alignment: .center, spacing: 4) {
                             Text("Read more")
@@ -457,42 +421,40 @@ extension SaintGroupDetailsView {
     
     private var fitImageView: some View {
         ScrollView(.horizontal) {
-            LazyHStack(spacing: 16) {
-                ForEach(occasionViewModel.filteredIcons.reversed()) { saint in
-                    VStack {}
-                    .frame(maxWidth: .infinity)
-                    .frame(width: 340, height: 460)
-                    .background(
-                        SaintGroupImageView(icon: saint)
-                            .matchedGeometryEffect(id: "\(saint.id)", in: namespace)
-                            .scaledToFill()
-                            .transition(.scale(scale: 1))
-                            .onTapGesture {
-                                selectedSaint = saint
-                                setSaint = saint
-                                print("this is the set saint \(setSaint?.caption)")
-                                occasionViewModel.selectedSaint = saint
-                                withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
-                                    occasionViewModel.showImageView = true
-                                    showImageViewer = true
-                                    offset = .zero
-                                    
-                                    
-                                }
-                            }
-                            .opacity(showImageViewer ? 0 : 1)
-                    )
-                    .mask({
-                        RoundedRectangle(cornerRadius: 24)
-                            .matchedGeometryEffect(id: "\(saint.image)", in: namespace)
-                    })
-                        .zIndex(selectedSaint == saint ? 1 : 0)
+            HStack(spacing: 16) {
+                ForEach(occasionViewModel.filteredIcons.reversed()) { data in
+                    RoundedRectangle(cornerRadius: 24)
+                        .fill(.clear)
+                        .background(
+                            ZStack(content: {
+                                SaintGroupImageView(icon: data)
+                                    .aspectRatio(contentMode: .fill)
+                                    .matchedGeometryEffect(
+                                        id: data.id,
+                                        in: namespace
+                                    )
+                                    .onTapGesture {
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
+                                            selectedSaints = data
+                                            showImageViewer = true
+                                            offset = .zero
+                                            occasionViewModel.selectedSaint = data
+                                        }
+                                    }
+                            })
+                            
+                                .opacity(showImageViewer ? 0 : 1)
+                        )
+                        .frame(width: 340, height: 460)
+                        
+                        .zIndex(selectedSaints == data ? 1 : 0)
+                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        //.matchedGeometryEffect(id: "newBound", in: namespace)
                         
                         
                 }
             }
             .padding(.horizontal, 20)
-            
         }
         .scrollTargetBehavior(.paging)
         .scrollIndicators(.hidden)

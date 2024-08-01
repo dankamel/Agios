@@ -34,7 +34,12 @@ struct SaintImageView: View {
                     
                     ShimmerView(heightSize: 600, cornerRadius: 24)
                         .transition(.opacity)
-                }       
+                }
+                
+                
+
+                    
+                    
             } else {
                 Image("placeholder")
                     .resizable()

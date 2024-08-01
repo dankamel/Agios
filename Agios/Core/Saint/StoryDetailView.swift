@@ -17,30 +17,23 @@ struct StoryDetailView: View {
             Color.white.ignoresSafeArea()
             
             Rectangle()
-                .fill(LinearGradient(colors: [.primary300, .clear], startPoint: .top, endPoint: .bottom))
+                .fill(LinearGradient(colors: [.primary500, .clear], startPoint: .top, endPoint: .bottom))
                 .frame(height: 48)
                 .frame(maxWidth: .infinity)
                 .ignoresSafeArea()
             
-            VStack(alignment: .center, spacing: 0) {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .frame(width: 40, height: 5)
-                    .foregroundColor(.primary400)
-                    .padding(.top, 10)
-                    .padding(.bottom, 10)
-                
-//                Button(action: {
-//                    presentationMode.wrappedValue.dismiss()
-//                }, label: {
-//                    NavigationButton(labelName: .close, backgroundColor: .primary100, foregroundColor: .primary1000)
-//                })
-//                .padding(.horizontal, vm.filteredIcons.count > 1 ? 16 : 20)
-//                .padding(.top, 24)
+            VStack(alignment: .leading, spacing: 16) {
+                Button(action: {
+                    presentationMode.wrappedValue.dismiss()
+                }, label: {
+                    NavigationButton(labelName: .down, backgroundColor: .primary100, foregroundColor: .primary1000)
+                })
+                .padding(.horizontal, vm.filteredIcons.count > 1 ? 16 : 20)
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
                         Text(formatTitleText(story.saint ?? "Title"))
-                            .font(.title)
+                            .font(.largeTitle)
                             .foregroundStyle(.gray900)
                             .fontWeight(.semibold)
                         
@@ -56,7 +49,7 @@ struct StoryDetailView: View {
                     .padding(.bottom, 24)
                 }
             }
-            //.padding(.top, 24) 
+            .padding(.top, 24)
         }
         .kerning(-0.4)
     }

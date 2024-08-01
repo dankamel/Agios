@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 struct SynaxarsDetailsView: View {
     //et icon: IconModel
     @Namespace var namespace
@@ -211,82 +210,4 @@ struct SynaxarsDetailsView: View {
     HeroWrapper {
         SynaxarsDetailsView()
     }
-    
 }
-
-
-
-
-/*
- ZStack {
-     if !show {
-         VStack(alignment: .leading) {
-             Spacer()
-             Text("Abba Agathon")
-                 .font(.body)
-                 //.matchedGeometryEffect(id: "title", in: namespace)
-                 .multilineTextAlignment(.center)
-                 .padding(8)
-                 .padding(.horizontal, 3)
-                 .foregroundColor(.white)
-                 .frame(maxWidth: .infinity)
-                 .background(Color.gray900.opacity(0.8))
-         }
-         //.padding(20)
-         .foregroundStyle(.white)
-         .background(
-             Image("Abba Agathon")
-                 .resizable()
-                 .matchedGeometryEffect(id: "back", in: namespace)
-                 .scaledToFill()
-                 
-         )
-         .mask({
-             RoundedRectangle(cornerRadius: 24)
-                 .matchedGeometryEffect(id: "mask", in: namespace)
-         })
-         .frame(width: 300, height: 350)
-         
-             
-     } else {
-         ScrollView {
-             VStack(alignment: .trailing) {
-                 Spacer()
-                 Text("Example of match geo")
-                     .matchedGeometryEffect(id: "sub", in: namespace)
-                 Text("Zuriks")
-                     .matchedGeometryEffect(id: "title", in: namespace)
-                     .frame(maxWidth: .infinity, alignment: .trailing)
-                     .font(.title)
-                 
-             }
-             .onTapGesture {
-                 withAnimation {
-                     show.toggle()
-                 }
-             }
-             .frame(height: 300)
-             .padding(20)
-             .foregroundStyle(.yellow)
-             .background(
-                 Image("Abba Agathon")
-                     .resizable()
-                     .matchedGeometryEffect(id: "back", in: namespace)
-                     .scaledToFill()
-                 
-             )
-             .mask({
-                 RoundedRectangle(cornerRadius: 24)
-                     .matchedGeometryEffect(id: "mask", in: namespace)
-             })
-         }
-             
-     }
- }
- .onTapGesture {
-     withAnimation {
-         show.toggle()
-     }
- }
-
- */

@@ -13,7 +13,7 @@ struct HomeSaintImageView: View {
     
     @EnvironmentObject private var viewModel: IconImageViewModel
     @EnvironmentObject private var occasionViewModel: OccasionsViewModel
-    var namespace: Namespace.ID
+    //var namespace: Namespace.ID
     let icon: IconModel
     
 //    @State private var selectedSaint: IconModel?
@@ -30,6 +30,7 @@ struct HomeSaintImageView: View {
                             .matchedGeometryEffect(id: "\(icon.id)", in: namespace)
                     )
                     .overlay(alignment: .bottom, content: {
+
                         Text(icon.caption ?? "")
                             .font(.body)
                             .multilineTextAlignment(.center)
@@ -87,7 +88,6 @@ struct HomeSaintImageView: View {
                 
                 
      
-                
             } else {
                 ShimmerView(heightSize: 350, cornerRadius: 24)
                     .frame(width: 300, alignment: .leading)
@@ -114,7 +114,7 @@ struct HomeSaintImageView: View {
 struct HomeSaintImageView_Preview: PreviewProvider {
     @Namespace static var namespace
     static var previews: some View {
-        HomeSaintImageView(namespace: namespace, icon: dev.icon)
+        HomeSaintImageView(icon: dev.icon)
             .environmentObject(IconImageViewModel(icon: dev.icon))
             .environmentObject(OccasionsViewModel())
     }

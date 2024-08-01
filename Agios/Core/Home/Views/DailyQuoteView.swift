@@ -18,20 +18,41 @@ struct DailyQuoteView: View {
            } else {
                ZStack {
                    VStack(alignment: .center, spacing: 16) {
-                       Text("Daily Quote".uppercased())
-                           .foregroundStyle(.gray900)
-                           .fontWeight(.semibold)
-                           .font(.callout)
-                           .kerning(1.3)
+                       HStack(alignment: .center, spacing: 8, content: {
+                           Image("single_leaf")
+                               .resizable()
+                               .renderingMode(.template)
+                               .frame(width: 40, height: 20, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
+                               .foregroundStyle(.primary900)
+                           
+                           Text("Daily Quote".uppercased())
+                               .foregroundStyle(.gray900)
+                               .fontWeight(.semibold)
+                               .font(.callout)
+                               .kerning(1.3)
+                           
+                           Image("single_leaf")
+                               .resizable()
+                               .renderingMode(.template)
+                               .frame(width: 40, height: 20, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
+                               .foregroundStyle(.primary900)
+                               .rotation3DEffect(
+                                   .degrees(180),
+                                   axis: (x: 0.0, y: 1.0, z: 0.0)
+                               )
+
+                       })
                    
-                       Text("〝 \(fact.fact ?? "Fact is empty.") 〞")
+                       Text(fact.fact ?? "Fact is empty.")
                                .multilineTextAlignment(.center)
                                .font(.title3)
                                .fontWeight(.semibold)
                                .foregroundStyle(.gray900)
                                .textSelection(.enabled)
-                               .kerning(-0.4)
                        
+                       /*
+                        
+                        */
                        Text("by fr pishoy kamel".uppercased())
                            .foregroundStyle(.gray900)
                            .fontWeight(.semibold)
@@ -48,7 +69,6 @@ struct DailyQuoteView: View {
                    })
                .padding(.horizontal, 20)
                }
-               
            }
         }
 

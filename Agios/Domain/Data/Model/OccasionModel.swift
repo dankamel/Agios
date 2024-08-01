@@ -102,6 +102,27 @@ struct DataReading: Identifiable, Codable, Equatable {
     static func == (lhs: DataReading, rhs: DataReading) -> Bool {
         return lhs.id == rhs.id
     }
+    
+    static let pastelColors: [Color] = [
+        Color(red: 253/255, green: 225/255, blue: 225/255),  // Pastel Red
+        Color(red: 253/255, green: 246/255, blue: 215/255),  // Pastel Yellow
+        Color(red: 215/255, green: 253/255, blue: 221/255),  // Pastel Green
+        Color(red: 215/255, green: 230/255, blue: 253/255),  // Pastel Blue
+        Color(red: 253/255, green: 225/255, blue: 253/255),  // Pastel Pink
+        Color(red: 1.0, green: 0.89, blue: 0.71), // Pastel Yellow (FFE4B5)
+        Color(red: 0.97, green: 0.67, blue: 0.67)  // Pastel Pink (F8ACAC)
+    ]
+
+    var sequentialPastel: Color {
+        struct SequentialPastelIndex {
+            static var currentIndex = 0
+        }
+
+        let pastColor = DataReading.pastelColors[SequentialPastelIndex.currentIndex]
+        SequentialPastelIndex.currentIndex = (SequentialPastelIndex.currentIndex + 1) % DataReading.pastelColors.count
+        return pastColor
+    }
+
 }
 
 // MARK: - SubSection
@@ -117,7 +138,7 @@ struct SubSection: Identifiable, Codable, Equatable {
 }
 
 // MARK: - SubSectionReading
-struct SubSectionReading: Codable {
+struct SubSectionReading: Codable, Identifiable {
     let id: Int?
     let title: String?
     let introduction: String?

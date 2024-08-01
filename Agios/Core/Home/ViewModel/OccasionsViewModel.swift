@@ -19,26 +19,19 @@ struct DateModel: Identifiable {
     var name: String
 }
 
-enum ViewState {
-    case collapsed
-    case expanded
-    case imageView
-}
-
 class OccasionsViewModel: ObservableObject {
     @Published var icons: [IconModel] = []
     @Published var selectedCopticDate: DateModel? = nil
     @Published var filteredIcons: [IconModel] = []
     @Published var stories: [Story] = []
     @Published var readings: [DataReading] = []
-    @Published var selectedItem: Bool = false
+    var liturgy: DataReading?
     @Published var dataClass: DataClass? = nil
     @Published var subSection: [SubSection] = []
     @Published var subSectionReading: [SubSectionReading] = []
     @Published var passages: [Passage] = []
     @Published var iconagrapher: Iconagrapher? = nil
     @Published var highlight: [Highlight] = []
-    @Published var viewState: ViewState = .collapsed
     @Published var newCopticDate: CopticDate? = nil {
         didSet {
             updateMockDates()
@@ -63,13 +56,7 @@ class OccasionsViewModel: ObservableObject {
     @Published var searchDate: String = ""
     @Published var showLaunchView: Bool = false
     @Published var showImageView: Bool = false
-    @Published var showStory: Bool? = false
-    @Published var showReading: Bool? = false
-    @Published var liturgicalInfoTapped: Bool = false
-    @Published var liturgicalInformation: String?
-    @Published var searchText: Bool = false
-    @Published var isTextFieldFocused: Bool = false
-    @Published var saintTapped: Bool = false
+    @Published var showStory: Bool = false
     @Published var feast: String = "" {
         didSet {
             updateMockDates()
@@ -83,9 +70,9 @@ class OccasionsViewModel: ObservableObject {
     
     @Published var mockDates: [DateModel] = []
     @Published var selectedMockDate: DateModel? = nil
-    
+    var copticEvents: [CopticEvent]?
     var feastName: String?
-    
+    var liturgicalInformation: String?
     var occasionName: String {
         dataClass?.name ?? "Unknown Occasion"
     }
@@ -97,8 +84,32 @@ class OccasionsViewModel: ObservableObject {
         withAnimation {
             self.isLoading = true
         }
+        getCopticEvents()
         updateMockDates()
         handleChangeInUrl()
+        
+    }
+    
+    private func loadJSONFromFile(fileName: String)  {
+        // Get the path for the JSON file
+        guard let path = Bundle.main.path(forResource: fileName, ofType: "json") else {
+            print("Invalid file path.")
+            return
+        }
+
+        do {
+            // Read the data from the file
+            let data = try Data(contentsOf: URL(fileURLWithPath: path))
+            
+            // Decode the data to an array of CopticEvent
+            copticEvents = try JSONDecoder().decode([CopticEvent].self, from: data)
+        } catch {
+            print("Error decoding JSON: \(error)")
+        }
+    }
+    
+    private func getCopticEvents() {
+       loadJSONFromFile(fileName: "copticEvents")
     }
     
     private func updateMockDates() {
@@ -109,26 +120,40 @@ class OccasionsViewModel: ObservableObject {
     }
     
     func filterDate() {
-        filteredDate = mockDates.filter {
-            Calendar.current.compare($0.customDate, to: datePicker, toGranularity: .day) == .orderedSame
-        }
         withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
             selectedCopticDate = filteredDate.first
             self.feast = selectedCopticDate?.name ?? "Fifth Week of the Holy Fifty Days"
-            if let selectedCopticDate = selectedCopticDate {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.95) {
-                    withAnimation {
-                        self.isLoading = true
-                        self.getPosts()
-                    }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.95) {
+                withAnimation {
+                    self.isLoading = true
+                    self.getPosts()
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation(.spring(response: 0.25, dampingFraction: 0.88)) {
-                        self.defaultDateTapped = false
-                    }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                withAnimation(.spring(response: 0.25, dampingFraction: 0.88)) {
+                    self.defaultDateTapped = false
                 }
             }
         }
+    }
+    
+    func copticDate(for date: Date) -> String {
+        let calendar = Calendar(identifier: .coptic)
+        let month = calendar.component(.month, from: date)
+        let day = calendar.component(.day, from: date)
+        let monthName = calendar.monthSymbols[month - 1]
+
+        return "\(monthName) \(day)"
+    }
+    
+    var occasionID: String? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy"
+        let formattedDate = formatter.string(from: datePicker)
+        if let event = copticEvents?.first(where: { $0.date == formattedDate }) {
+            return event.occasionID
+        }
+        return nil
     }
     
     func getPosts() {
@@ -138,12 +163,9 @@ class OccasionsViewModel: ObservableObject {
             do {
                 let (data, response) = try await URLSession.shared.data(from: url)
                 let decodedResponse = try handleOutput(response: response, data: data)
-                await MainActor.run {
-                    self.updateUI(with: decodedResponse)
-                }
+                    await updateUI(with: decodedResponse)
             } catch {
-                print("Error fetching data: \(error)")
-            }
+                print("Error fetching data: \(error)")            }
         }
     }
     
@@ -155,6 +177,7 @@ class OccasionsViewModel: ObservableObject {
         return try JSONDecoder().decode(Response.self, from: data)
     }
     
+    @MainActor
     func updateUI(with response: Response) {
         withAnimation(.spring(response: 0.07, dampingFraction: 0.9, blendDuration: 1)) {
             self.isLoading = false
@@ -162,12 +185,12 @@ class OccasionsViewModel: ObservableObject {
         
         self.icons = response.data.icons ?? []
         self.stories = response.data.stories ?? []
-        self.readings = response.data.readings ?? []
+        self.readings = response.data.readings?.filter { $0.title != "Liturgy"} ?? []
+        self.liturgy = response.data.readings?.first { $0.title == "Liturgy" }
         self.dataClass = response.data
         self.newCopticDate = response.data.copticDate ?? nil
         self.fact = response.data.facts ?? []
         self.retrievePassages()
-        self.liturgicalInformation = response.data.liturgicalInformation
         
         for icon in response.data.icons ?? [] {
             if case let .iconagrapher(iconagrapher) = icon.iconagrapher {
@@ -181,10 +204,7 @@ class OccasionsViewModel: ObservableObject {
             }
         }
         
-        for reading in response.data.readings ?? [] {
-            self.subSection = reading.subSections ?? []
-        }
-        
+        self.subSection = readings.flatMap { $0.subSections ?? [] }
         for story in self.stories {
             self.highlight = story.highlights ?? []
         }
@@ -254,7 +274,6 @@ class OccasionsViewModel: ObservableObject {
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             withAnimation {
-                print("\(String(describing: self.selectedCopticDate?.urlLink))")
                 self.isLoading = true
                 self.getPosts()
             }
@@ -262,11 +281,7 @@ class OccasionsViewModel: ObservableObject {
             self.feast = self.selectedMockDate?.name ?? "Fifth Week of the Holy Fifty Days"
         }
     }
-    
-    func setDatePickerToUrl() {
-        self.datePicker = self.mockDates.last?.customDate ?? Date()
-    }
-
+        
     func formattedDate(from dateString: String) -> String? {
         let inputFormatter = ISO8601DateFormatter()
         guard let date = inputFormatter.date(from: dateString) else { return nil }
@@ -275,7 +290,7 @@ class OccasionsViewModel: ObservableObject {
         outputFormatter.dateFormat = "d MMMM yyyy"
         return outputFormatter.string(from: date)
     }
-
+    
     func formatDateStringToRelativeDay(_ dateString: String) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -293,7 +308,7 @@ class OccasionsViewModel: ObservableObject {
             return dateFormatter.string(from: date)
         }
     }
-
+    
     func formatDateStringToFullDate(dateString: String) -> String {
         let inputFormatter = DateFormatter()
         inputFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
@@ -308,7 +323,7 @@ class OccasionsViewModel: ObservableObject {
         
         return outputFormatter.string(from: date)
     }
-
+    
     func formatDateStringToShortDate(dateString: String) -> String {
         let inputFormatter = DateFormatter()
         inputFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
@@ -323,7 +338,7 @@ class OccasionsViewModel: ObservableObject {
         
         return outputFormatter.string(from: date)
     }
-
+    
     func formatDateStringToTime(dateString: String) -> String {
         let inputFormatter = DateFormatter()
         inputFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
@@ -339,10 +354,6 @@ class OccasionsViewModel: ObservableObject {
         outputFormatter.pmSymbol = "pm"
         
         return outputFormatter.string(from: date).lowercased()
-    }
-    
-    func hideKeyboard() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 

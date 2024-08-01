@@ -31,7 +31,7 @@ class ImageViewerViewModel: ObservableObject {
     }
     
     func onEnd(value: DragGesture.Value) {
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.7, blendDuration: 1)) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7, blendDuration: 1)) {
             var translation = value.translation.height
             
             if translation <  0 {

@@ -15,19 +15,19 @@ struct DateView: View {
     case feast
     case yearAhead
         
-        func title(using viewModel: OccasionsViewModel) -> String {
+        var title: String {
             switch self {
             case .regularDate:
-                return "\(viewModel.datePicker.formatDateShort(viewModel.datePicker))"
+                return "Date"
             case .feast:
-                return "\(viewModel.selectedCopticDate?.month ?? "\(viewModel.newCopticDate?.month ?? "")") \(viewModel.selectedCopticDate?.day ?? "\(viewModel.newCopticDate?.day ?? "")")"
+                return "Feast"
             case .yearAhead:
                 return "Year ahead"
             }
         }
         
         @ViewBuilder
-        func selectedDate(using viewModel: OccasionsViewModel) -> some View {
+        var selectedDate: any View {
             switch self {
             case .regularDate:
                 NormalDateView()
@@ -40,7 +40,7 @@ struct DateView: View {
     }
     
     @EnvironmentObject private var occasionViewModel: OccasionsViewModel
-    var transition: Namespace.ID
+    var namespace: Namespace.ID
     @State private var openCopticList: Bool = false
     @State private var datePicker: Date = Date()
     @Environment(\.colorScheme) var colorScheme
@@ -59,33 +59,28 @@ struct DateView: View {
                     Spacer()
                     
                     HStack(spacing: 8) {
-                        /*
-                         Text(occasionViewModel.datePicker.formatted(date: .abbreviated, time: .omitted))
-                             .lineLimit(1)
-                             .matchedGeometryEffect(id: "regularDate", in: namespace)
-                         
-
-                             //.frame(width: 120, alignment: .leading)
-                             
-                         
-                         Rectangle()
-                             .fill(.gray900)
-                             .frame(width: 1, height: 17)
-                             .matchedGeometryEffect(id: "divider", in: namespace)
-                         
-                         Text("\(occasionViewModel.selectedCopticDate?.month ?? "\(occasionViewModel.newCopticDate?.month ?? "")") \(occasionViewModel.selectedCopticDate?.day ?? "\(occasionViewModel.newCopticDate?.day ?? "")")")
-                             .lineLimit(1)
-                             .foregroundStyle(.gray900)
-                             .frame(width: 100)
-                             .matchedGeometryEffect(id: "copticDate", in: namespace)
-                             //.frame(width: 120, alignment: .leading)
-                         */
+                        Text(occasionViewModel.datePicker.formatted(date: .abbreviated, time: .omitted))
+                            .lineLimit(1)
+                            .matchedGeometryEffect(id: "regularDate", in: namespace)
                         
-                        Text("Select a date")
-                            .fontWeight(.medium)
+
+                            //.frame(width: 120, alignment: .leading)
+                            
+                        
+                        Rectangle()
+                            .fill(.gray900)
+                            .frame(width: 1, height: 17)
+                            .matchedGeometryEffect(id: "divider", in: namespace)
+                        
+                        Text("\(occasionViewModel.selectedCopticDate?.month ?? "\(occasionViewModel.newCopticDate?.month ?? "")") \(occasionViewModel.selectedCopticDate?.day ?? "\(occasionViewModel.newCopticDate?.day ?? "")")")
+                            .lineLimit(1)
+                            .foregroundStyle(.gray900)
+                            .frame(width: 100)
+                            .matchedGeometryEffect(id: "copticDate", in: namespace)
+                            //.frame(width: 120, alignment: .leading)
                             
                     }
-                    //.frame(maxWidth: .infinity, alignment: .center)
+                    .frame(maxWidth: .infinity, alignment: .center)
                     
                     Spacer()
                        
@@ -104,11 +99,10 @@ struct DateView: View {
                                 Button {
                                     withAnimation {
                                         animationsMode = mode
-                                        occasionViewModel.hideKeyboard()
                                     }
                                     
                                 } label: {
-                                    Text(mode.title(using: occasionViewModel))
+                                    Text(mode.title)
                                         .foregroundStyle(animationsMode == mode ? .gray900 : .gray400.opacity(0.7))
                                         .font(.body)
                                         .frame(maxWidth: .infinity)
@@ -138,14 +132,14 @@ struct DateView: View {
                     }
                     .animation(.spring(response: 0.4, dampingFraction: 0.9), value: animationsMode)
                     
-                    animationsMode.selectedDate(using: occasionViewModel)
-                                            .transition(.opacity.combined(with: .scale(scale: 0.94, anchor: .bottom)).animation(.spring(response: 0.3, dampingFraction: 1)))
+                    AnyView(animationsMode.selectedDate)
+                        .transition(.opacity.combined(with: .scale(scale: 0.94, anchor: .bottom)).animation(.spring(response: 0.3, dampingFraction: 1)))
                     
                 }
                 .scaleEffect(openCopticList ? 1 : 0.85, anchor: .top)
                 .blur(radius: openCopticList ? 0 : 15)
                 .opacity(openCopticList ? 1 : 0)
-                .animation(.spring(response: 0.4, dampingFraction: 1), value: animationsMode)
+                .animation(.spring(response: 0.5, dampingFraction: 0.85), value: animationsMode)
             }
             //.padding(.horizontal, 16)
             .foregroundStyle(.gray900)
@@ -167,8 +161,6 @@ struct DateView: View {
                 withAnimation(.spring(response: 0.25, dampingFraction: 0.88)) {
                     occasionViewModel.defaultDateTapped = false
                     occasionViewModel.searchDate = ""
-                    occasionViewModel.searchText = false
-                    occasionViewModel.hideKeyboard()
                 }
                 //HapticsManager.instance.impact(style: .light)
             } label: {
@@ -188,11 +180,11 @@ struct DateView: View {
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .fill(.white)
-                .matchedGeometryEffect(id: "background", in: transition)
+                .matchedGeometryEffect(id: "background", in: namespace)
         )
         .mask({
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .matchedGeometryEffect(id: "mask", in: transition)
+                .matchedGeometryEffect(id: "mask", in: namespace)
         })
         .padding(.horizontal, 20)
         .onAppear(perform: {
@@ -215,6 +207,7 @@ struct DateView: View {
         .fontDesign(.rounded)
         .animation(.spring(response: 0.35, dampingFraction: 0.9), value: animationsMode)
         .frame(maxWidth: 400)
+        .padding(.bottom, 8)
         .overlay(alignment: .bottom) {
             ZStack(content: {
                 if animationsMode == .regularDate {
@@ -242,16 +235,14 @@ struct DateView: View {
         }
         
     }
-    
-    
 }
 
 struct DateView_Preview: PreviewProvider {
     
-    @Namespace static var transition
+    @Namespace static var namespace
     
     static var previews: some View {
-        DateView(transition: transition)
+        DateView(namespace: namespace)
             .environmentObject(OccasionsViewModel())
     }
 }
@@ -273,8 +264,56 @@ struct NormalDateView: View {
 
 struct FeastView: View {
     @EnvironmentObject private var occasionViewModel: OccasionsViewModel
-    
-    @FocusState private var isTextFieldFocused: Bool
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 8) {
+                ForEach(occasionViewModel.mockDates) { date in
+                    Button(action: {
+                        withAnimation(.spring(response: 0.25, dampingFraction: 0.88)) {
+                            occasionViewModel.copticDateTapped = false
+                            occasionViewModel.selectedCopticDate = date
+                            occasionViewModel.handleChangeInUrl()
+                            occasionViewModel.selectedMockDate = date
+                        }
+                        HapticsManager.instance.impact(style: .light)
+                        
+                    }, label: {
+                        HStack {
+                            Text("\(date.name)")
+                                .foregroundStyle(.primary1000)
+                                .lineLimit(1)
+                                //.frame(width: 160)
+//                            Spacer()
+//                            Text("\(date.month) \(date.day)")
+//                                .foregroundStyle(.primary1000.opacity(0.7))
+//                                
+                        }
+                        .fontWeight(.medium)
+                        .padding(.vertical, 9)
+                        .padding(.horizontal, 16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(.primary100)
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: /*@START_MENU_TOKEN@*/.continuous/*@END_MENU_TOKEN@*/))
+
+                    })
+                    .buttonStyle(BouncyButton())
+                    .padding(.horizontal, 16)
+                }
+                
+            }
+            .foregroundStyle(.primary1000)
+            .padding(.vertical, 8)
+            .padding(.bottom, 30)
+            .padding(.top, 4)
+        }
+        .scrollIndicators(.hidden)
+        .frame(height: 250, alignment: .top)
+    }
+}
+
+struct YearAheadView: View {
+    @EnvironmentObject private var occasionViewModel: OccasionsViewModel
+    @State private var searchText: Bool = false
     
     var filteredDates: [DateModel] {
         if occasionViewModel.searchDate.isEmpty {
@@ -294,33 +333,28 @@ struct FeastView: View {
             HStack(alignment: .center, spacing: 8) {
                 Image(systemName: "magnifyingglass")
                     .font(.callout)
-                    .foregroundStyle(isTextFieldFocused ? .primary900 : .gray200)
+                    .foregroundStyle(searchText ? .primary900 : .gray200)
                 
                 
                 TextField("Search", text: $occasionViewModel.searchDate)
                     .foregroundStyle(.gray900)
                     .frame(maxWidth: .infinity)
                     .submitLabel(.search)
-                    .focused($isTextFieldFocused)
             }
             .fontWeight(.medium)
             .foregroundStyle(.gray300)
             .padding(.horizontal, 8)
             .padding(.vertical, 9)
-            .background(.white)
             .overlay {
                 RoundedRectangle(cornerRadius: 32)
-                    .stroke(isTextFieldFocused ? .primary900 : .gray200, lineWidth: 1)
+                    .stroke(searchText ? .primary900 : .gray200, lineWidth: 1)
             }
             .onTapGesture {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
-                    occasionViewModel.searchText = true
-                    isTextFieldFocused.toggle()
+                    searchText = true
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.top, 16)
-            
             
             ScrollView {
                 VStack(spacing: 8) {
@@ -345,8 +379,8 @@ struct FeastView: View {
                             Button(action: {
                                 withAnimation(.spring(response: 0.25, dampingFraction: 0.88)) {
                                     occasionViewModel.copticDateTapped = false
+                                    searchText = false
                                     occasionViewModel.selectedCopticDate = date
-                                    isTextFieldFocused = false
                                     occasionViewModel.handleChangeInUrl()
                                     occasionViewModel.selectedMockDate = date
                                 }
@@ -356,65 +390,8 @@ struct FeastView: View {
                                 HStack {
                                     Text("\(date.month) \(date.day)")
                                         .foregroundStyle(.primary1000)
-                                        .lineLimit(1)
-                                    //.frame(width: 160)
-                                    //                            Spacer()
-                                    //                            Text("\(date.month) \(date.day)")
-                                    //                                .foregroundStyle(.primary1000.opacity(0.7))
-                                    //
-                                }
-                                .fontWeight(.medium)
-                                .padding(.vertical, 9)
-                                .padding(.horizontal, 16)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(.primary100)
-                                .clipShape(RoundedRectangle(cornerRadius: 12, style: /*@START_MENU_TOKEN@*/.continuous/*@END_MENU_TOKEN@*/))
-                                
-                            })
-                            .buttonStyle(BouncyButton())
-                            .padding(.horizontal, 16)
-                        }
-                    }
-
-                    
-                }
-                .foregroundStyle(.primary1000)
-                .padding(.vertical, 8)
-                .padding(.bottom, 30)
-                .padding(.top, 4)
-            }
-            .scrollIndicators(.hidden)
-            .frame(height: 250, alignment: .top)
-        }
-    }
-}
-
-struct YearAheadView: View {
-    @EnvironmentObject private var occasionViewModel: OccasionsViewModel
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            
-            
-            ScrollView {
-                VStack(spacing: 8) {
-                    ForEach(occasionViewModel.mockDates) { date in
-                            Button(action: {
-                                withAnimation(.spring(response: 0.25, dampingFraction: 0.88)) {
-                                    occasionViewModel.copticDateTapped = false
-                                    occasionViewModel.selectedCopticDate = date
-                                    occasionViewModel.handleChangeInUrl()
-                                    occasionViewModel.selectedMockDate = date
-                                }
-                                HapticsManager.instance.impact(style: .light)
-                                
-                            }, label: {
-                                VStack(alignment: .leading, spacing: 7) {
-                                    Text("\(date.name)")
-                                        .foregroundStyle(.primary1000)
-                                    
+                                    Spacer()
                                     Text("\(occasionViewModel.formatDateStringToFullDate(dateString: date.date))")
-                                        .font(.callout)
                                         .foregroundStyle(.primary1000.opacity(0.7))
                                         .lineLimit(1)
                                     
@@ -430,7 +407,7 @@ struct YearAheadView: View {
                         }
                         .padding(.horizontal, 16)
 
-                    
+                    }
                 }
                 .padding(.vertical, 8)
                 .padding(.bottom, 30)
@@ -439,8 +416,9 @@ struct YearAheadView: View {
             .frame(height: 250, alignment: .top)
 
         }
-        
+        .padding(.top, 12)
         
 
     }
 }
+

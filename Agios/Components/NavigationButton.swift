@@ -24,7 +24,7 @@ struct NavigationButton: View {
             .fontWeight(.semibold)
             .font(.body)
             .foregroundStyle(foregroundColor)
-            .padding(14)
+            .padding(12)
             .background(backgroundColor)
             .clipShape(Circle())
     }
