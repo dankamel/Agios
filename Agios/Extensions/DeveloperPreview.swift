@@ -21,6 +21,8 @@ class DeveloperPreview {
     private init() { } 
     
     let occasionsViewModel = OccasionsViewModel()
+    //let iconsImageViewModel = IconImageViewModel(icon: dev.icon)
+    //let imageViewModel = ImageViewerViewModel()
     
     let icon = IconModel(
         id: "7hcbmyqwty25hjc", created: "2024-04-20T21:19:22.339Z",

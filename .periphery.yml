@@ -1,6 +1,0 @@
-project: Agios.xcodeproj
-retain_public: true
-schemes:
-- Agios
-targets:
-- Agios

@@ -1,0 +1,21 @@
+{
+  "images" : [
+    {
+      "filename" : "St. Athanasius the Apostolic Defender of the Faith at the Council of Nicea When He Was Only 27 Years Old.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "The Flight into Egypt.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

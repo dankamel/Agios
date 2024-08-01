@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "St. Marina the Martyr.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

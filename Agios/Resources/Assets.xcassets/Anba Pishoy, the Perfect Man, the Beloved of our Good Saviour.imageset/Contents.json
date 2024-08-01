@@ -1,0 +1,21 @@
+{
+  "images" : [
+    {
+      "filename" : "Anba Pishoy, the Perfect Man, the Beloved of our Good Saviour.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
