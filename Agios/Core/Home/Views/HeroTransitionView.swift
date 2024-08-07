@@ -88,6 +88,7 @@ struct CardView: View {
     @State private var scrollViewOffset: CGFloat = 0
     @Environment(\.presentationMode) var presentationMode
     @State private var verticalPosition = 0.0
+    @GestureState private var isPressed = false
     
     
     init(icon: IconModel, iconographer: Iconagrapher, stories: Story, showImageViewer: Binding<Bool>, selectedSaint: Binding<IconModel?>, namespace: Namespace.ID) {
@@ -194,7 +195,7 @@ struct CardView: View {
                         .foregroundStyle(.gray900)
                     }
                     .scrollIndicators(.hidden)
-                    .scrollDisabled(verticalPosition > 30 ? true : false)
+                    .scrollDisabled(verticalPosition > 10 ? true : false)
                     .overlay(alignment: .top) {
                         ZStack(alignment: .center) {
                             VariableBlurView(maxBlurRadius: 15, direction: .blurredTopClearBottom, startOffset: 0)
@@ -260,11 +261,29 @@ struct CardView: View {
         } completion: { status in
             print(status ? "Open" : "Close")
         }
+        .onChange(of: isPressed) { oldValue, pressed in
+            if pressed {
+                print("changed")
+            } else {
+                print("ended")
+                if verticalPosition > 0 {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+                        verticalPosition = .zero
+                        showView = false
+                        goBack()
+                    }
+                }
+            }
+        }
     }
     
     
     private func gestureVertical() -> some Gesture {
-        return DragGesture()
+        return DragGesture(minimumDistance: 0)
+            .updating($isPressed) { (value, gestureState, transaction) in
+                gestureState = true
+                verticalPosition = .zero
+            }
             .onChanged { value in
                 if value.translation.height > 0 { // Only allow downward dragging
                     verticalPosition = value.translation.height
@@ -276,14 +295,12 @@ struct CardView: View {
                         verticalPosition = .zero
                         showView = false
                         goBack()
-                        
                     }
                     withAnimation(.easeIn(duration: 0.6)) {
                         showTest = false
                     }
                 } else {
                     verticalPosition = .zero
-                    //showView = false
                 }
             }
     }
