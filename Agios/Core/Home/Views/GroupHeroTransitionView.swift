@@ -153,6 +153,7 @@ struct GroupCardView: View {
     @State private var newSelectedIcon: IconModel? = nil
     @State private var isDragging = false
     @State private var selectedIconIndex: Int = 0
+    @State private var disableScrolling: Bool = false
     
     init(icon: IconModel, iconographer: Iconagrapher, stories: Story, showImageViewer: Binding<Bool>, selectedSaint: Binding<IconModel?>, namespace: Namespace.ID) {
         _viewModel = StateObject(wrappedValue: IconImageViewModel(icon: icon))
@@ -227,7 +228,7 @@ struct GroupCardView: View {
 
                     }
                     .scrollIndicators(.hidden)
-                    .scrollDisabled(verticalPosition > 0)
+                    .scrollDisabled(disableScrolling || verticalPosition > 0)
                     .overlay(alignment: .top) {
                         ZStack(alignment: .center) {
                             VariableBlurView(maxBlurRadius: 15, direction: .blurredTopClearBottom, startOffset: 0)
@@ -246,12 +247,28 @@ struct GroupCardView: View {
                closeButton
                 
             }
+            //.interactiveDismissDisabled(disableScrolling)
             .ignoresSafeArea()
             .halfSheet(showSheet: $openSheet) {
                 StoryDetailView(story: stories)
                     .presentationDetents([.medium, .large])
                     .environmentObject(occasionViewModel)
-            } onDismiss: {}
+            } onDismiss: {
+                disableScrolling = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    print("Dismissed")
+                    
+                    disableScrolling = true
+                    print("Value for disabling scrolling \(disableScrolling)")
+
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        disableScrolling = false
+                        print("Value for disabling scrolling \(disableScrolling)")
+
+                    }
+                }
+                
+            }
             .onAppear {
                 withAnimation {
                     showImageViewer = false

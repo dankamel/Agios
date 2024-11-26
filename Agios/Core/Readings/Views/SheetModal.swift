@@ -176,6 +176,7 @@ struct HalfSheetHelper<Content: View>: UIViewControllerRepresentable {
         
         func presentationControllerWillDismiss(_ presentationController: UIPresentationController) {
             parent.showSheet = false
+            parent.onDismiss()
         }
     }
 }
