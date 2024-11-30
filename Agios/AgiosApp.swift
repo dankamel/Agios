@@ -11,7 +11,7 @@ import Shake
 @main
 struct AgiosApp: App {
     
-    private var occasionViewModel = OccasionsViewModel()
+    @StateObject private var occasionViewModel = OccasionsViewModel()
     @StateObject private var iconImageViewModel = IconImageViewModel(icon: dev.icon)
     @StateObject private var imageViewModel = IconImageViewModel(icon: IconModel(id: "", created: "", updated: "", caption: "", explanation: "", story: [], image: "", croppedImage: "", iconagrapher: .iconagrapher(Iconagrapher(id: "", name: "", url: ""))))
     @StateObject private var quoteViewModel = DailyQuoteViewModel()
@@ -24,7 +24,10 @@ struct AgiosApp: App {
             ZStack(content: {
                 NavigationStack {
                     HeroWrapper {
-                        HomeView(occasionViewModel: occasionViewModel, namespace: namespace, transition: transition)
+                        //SynaxarsDetailsView()
+                        //HeroTransitionView(namespace: namespace)
+                        HomeView(namespace: namespace, transition: transition)
+                            .environmentObject(occasionViewModel)
                             .environmentObject(imageViewModel)
                             .environmentObject(iconImageViewModel)
                             .environmentObject(quoteViewModel)
@@ -34,8 +37,9 @@ struct AgiosApp: App {
                 
                 ZStack(content: {
                     if showLaunchView {
-                        LaunchView(vm: occasionViewModel, showLaunchView: $showLaunchView)
+                        LaunchView(showLaunchView: $showLaunchView)
                             .transition(.opacity.animation(.easeOut(duration: 0.2)))
+                            .environmentObject(occasionViewModel)
                     }
                 })
                 .zIndex(2.0)

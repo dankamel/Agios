@@ -9,7 +9,6 @@ import SwiftUI
 
 struct DetailLoadingView: View {
     @Binding var icon: IconModel?
-    @ObservedObject var viewModel: OccasionsViewModel
     let story: Story
     
     @State private var showImageViewer = false
@@ -19,7 +18,6 @@ struct DetailLoadingView: View {
     var body: some View {
         if let icon = icon {
             SaintDetailsView(
-                viewModel: viewModel,
                 icon: icon,
                 iconographer: dev.iconagrapher,
                 stories: story,
@@ -27,13 +25,14 @@ struct DetailLoadingView: View {
                 selectedSaint: $selectedSaint,
                 namespace: namespace
             )
+            
         }
     }
 }
 
 struct SaintDetailsView: View {
     
-    @ObservedObject private var occasionViewModel: OccasionsViewModel
+    @EnvironmentObject private var occasionViewModel: OccasionsViewModel
     let icon: IconModel
     let iconographer: Iconagrapher
     let stories: Story
@@ -53,12 +52,11 @@ struct SaintDetailsView: View {
     @State private var descriptionHeight: Int = 3
     @State private var storyHeight: Int = 6
     @State private var openSheet: Bool? = false
-    @ObservedObject private var viewModel: IconImageViewModel
+    @StateObject private var viewModel: IconImageViewModel
     @Environment(\.presentationMode) var presentationMode
     
-    init(viewModel: OccasionsViewModel, icon: IconModel, iconographer: Iconagrapher, stories: Story, showImageViewer: Binding<Bool>, selectedSaint: Binding<IconModel?>, namespace: Namespace.ID) {
-        _viewModel = ObservedObject(wrappedValue: IconImageViewModel(icon: icon))
-        self.occasionViewModel = viewModel
+    init(icon: IconModel, iconographer: Iconagrapher, stories: Story, showImageViewer: Binding<Bool>, selectedSaint: Binding<IconModel?>, namespace: Namespace.ID) {
+        _viewModel = StateObject(wrappedValue: IconImageViewModel(icon: icon))
         self.iconographer = iconographer
         self.stories = stories
         self._showImageViewer = showImageViewer
@@ -118,8 +116,9 @@ struct SaintDetailsView: View {
             
         }
         .halfSheet(showSheet: $openSheet) {
-            StoryDetailView(story: stories, vm: occasionViewModel)
+            StoryDetailView(story: stories)
                 .presentationDetents([.medium, .large])
+                .environmentObject(occasionViewModel)
         } onDismiss: {}
         .onAppear {
             withAnimation {
@@ -173,14 +172,16 @@ struct SaintDetailsView: View {
 }
 
 
-//struct SaintDetailsView_Preview: PreviewProvider {
-//    
-//    @Namespace static var namespace
-//    
-//    static var previews: some View {
-//        SaintDetailsView(icon: dev.icon, iconographer: dev.iconagrapher, stories: dev.story, showImageViewer: .constant(false), selectedSaint: .constant(dev.icon), namespace: namespace)
-//    }
-//}
+struct SaintDetailsView_Preview: PreviewProvider {
+    
+    @Namespace static var namespace
+    
+    static var previews: some View {
+        SaintDetailsView(icon: dev.icon, iconographer: dev.iconagrapher, stories: dev.story, showImageViewer: .constant(false), selectedSaint: .constant(dev.icon), namespace: namespace)
+            .environmentObject(dev.occasionsViewModel)
+            //.environmentObject(dev.imageViewModel)
+    }
+}
 
 
 extension SaintDetailsView {
@@ -494,6 +495,31 @@ extension SaintDetailsView {
                 RoundedRectangle(cornerRadius: 24)
                     .matchedGeometryEffect(id: "\(icon.image)", in: namespace)
             })
+        /*
+         VStack {}
+         .frame(maxWidth: .infinity)
+         .frame(height: 420)
+         .background(
+             SaintImageView(icon: icon)
+                 .matchedGeometryEffect(id: "\(icon.id)", in: namespace)
+                 .scaledToFill()
+                 .transition(.scale(scale: 1))
+                 .onTapGesture {
+                     withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+                         showImageViewer = true
+                         occasionViewModel.showImageView = true
+                         occasionViewModel.stopDragGesture = true
+                         
+                     }
+                 }
+         )
+         .mask({
+             RoundedRectangle(cornerRadius: 24)
+                 .matchedGeometryEffect(id: "\(icon.image)", in: namespace)
+         })
+         */
+        
+        
     }
     
     private var iconCaption: some View {

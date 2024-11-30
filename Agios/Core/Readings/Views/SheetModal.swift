@@ -16,7 +16,7 @@ struct SheetModel: View {
     let verse: Verse
     let subSection: SubSection
     
-    @ObservedObject private var occasionViewModel: OccasionsViewModel
+    @EnvironmentObject private var occasionViewModel: OccasionsViewModel
     
     var body: some View {
         Button(action: {
@@ -116,12 +116,13 @@ struct SheetModel: View {
         
     }
 }
-//
-//struct SheetModel_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SheetModel(passage: dev.passages, verse: dev.verses, subSection: dev.subSection)
-//    }
-//}
+
+struct SheetModel_Previews: PreviewProvider {
+    static var previews: some View {
+        SheetModel(passage: dev.passages, verse: dev.verses, subSection: dev.subSection)
+            .environmentObject(OccasionsViewModel())
+    }
+}
 
 extension View {
     //binding show bariable...
