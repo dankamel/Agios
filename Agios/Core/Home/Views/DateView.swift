@@ -29,16 +29,16 @@ struct DateView: View {
        func selectedDate(using viewModel: OccasionsViewModel) -> some View {
            switch self {
            case .regularDate:
-               NormalDateView()
+                   NormalDateView(vm: viewModel)
            case .feast:
-               FeastView()
+                   FeastView(occasionViewModel: viewModel)
            case .yearAhead:
-               YearAheadView()
+                   YearAheadView(occasionViewModel: viewModel)
            }
        }
    }
     
-    @EnvironmentObject private var occasionViewModel: OccasionsViewModel
+    @ObservedObject private var occasionViewModel: OccasionsViewModel
     var transition: Namespace.ID
     @State private var openCopticList: Bool = false
     @State private var datePicker: Date = Date()
@@ -49,6 +49,10 @@ struct DateView: View {
     @State private var yearTapped: Bool = false
     let startingDate: Date = Calendar.current.date(from: DateComponents(year: 2023)) ?? Date()
     
+    init(occasionViewModel: OccasionsViewModel, transition: Namespace.ID) {
+        self.occasionViewModel = occasionViewModel
+        self.transition = transition
+    }
     @AppStorage("animationModeKey") private var animationsMode: DateSelection = .regularDate
     
     var body: some View {
@@ -195,18 +199,12 @@ struct DateView: View {
     
 }
 
-struct DateView_Preview: PreviewProvider {
-    
-    @Namespace static var transition
-    
-    static var previews: some View {
-        DateView(transition: transition)
-            .environmentObject(OccasionsViewModel())
-    }
-}
-
 struct NormalDateView: View {
-    @EnvironmentObject private var vm: OccasionsViewModel
+    @ObservedObject private var vm: OccasionsViewModel
+    
+    init(vm: OccasionsViewModel) {
+        self.vm = vm
+    }
     var body: some View {
         DatePicker("", selection: $vm.datePicker, in: Date.dateRange, displayedComponents: [.date])
         .datePickerStyle(.graphical)
@@ -219,10 +217,14 @@ struct NormalDateView: View {
 }
 
 struct FeastView: View {
-    @EnvironmentObject private var occasionViewModel: OccasionsViewModel
+    @ObservedObject private var occasionViewModel: OccasionsViewModel
     
     @FocusState private var isTextFieldFocused: Bool
     @State private var selectedCopticMonth: CopticMonth? = nil
+    
+    init(occasionViewModel: OccasionsViewModel) {
+        self.occasionViewModel = occasionViewModel
+    }
     
     var filteredDates: [CopticMonth] {
         if occasionViewModel.searchDate.isEmpty {
@@ -512,7 +514,11 @@ struct FeastView: View {
 }
 
 struct YearAheadView: View {
-    @EnvironmentObject private var occasionViewModel: OccasionsViewModel
+    @ObservedObject private var occasionViewModel: OccasionsViewModel
+    
+    init(occasionViewModel: OccasionsViewModel) {
+        self.occasionViewModel = occasionViewModel
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {

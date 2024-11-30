@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CopticDateView: View {
     
-    @EnvironmentObject private var occasionViewModel: OccasionsViewModel
+    @ObservedObject private var occasionViewModel: OccasionsViewModel
     var namespace: Namespace.ID
     @State private var openCopticList: Bool = false
     
@@ -107,12 +107,12 @@ struct CopticDateView: View {
     }
 }
 
-struct CopticDateView_Preview: PreviewProvider {
-    
-    @Namespace static var namespace
-    
-    static var previews: some View {
-        CopticDateView(namespace: namespace)
-            .environmentObject(OccasionsViewModel())
-    }
-}
+//struct CopticDateView_Preview: PreviewProvider {
+//    
+//    @Namespace static var namespace
+//    
+//    static var previews: some View {
+//        CopticDateView(namespace: namespace)
+//            .environmentObject(OccasionsViewModel())
+//    }
+//}

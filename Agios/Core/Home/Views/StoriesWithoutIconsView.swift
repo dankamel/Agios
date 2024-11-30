@@ -9,7 +9,7 @@ import SwiftUI
 import Shimmer
 
 struct StoriesWithoutIconsView: View {
-    @EnvironmentObject var occasionViewModel: OccasionsViewModel
+    @ObservedObject var occasionViewModel: OccasionsViewModel
     @State private var showImageViewer = false
     @State private var selectedSaint: IconModel? = nil
     var namespace: Namespace.ID
@@ -17,7 +17,7 @@ struct StoriesWithoutIconsView: View {
     var body: some View {
         HStack(spacing: 16) {
             ForEach(occasionViewModel.storiesWithoutIcons) { story in
-                NoIconsCardView(icon: dev.icon, iconographer: occasionViewModel.iconagrapher ?? dev.iconagrapher, stories: story, showImageViewer: $showImageViewer, selectedSaint: $selectedSaint, namespace: namespace)
+                NoIconsCardView(viewModel: occasionViewModel, icon: dev.icon, iconographer: occasionViewModel.iconagrapher ?? dev.iconagrapher, stories: story, showImageViewer: $showImageViewer, selectedSaint: $selectedSaint, namespace: namespace)
                     .contextMenu(ContextMenu(menuItems: {
                         Button {
                             occasionViewModel.showStory?.toggle()
@@ -43,7 +43,6 @@ struct StoriesWithoutIconsView: View {
  #Preview {
      HeroWrapper {
          HeroTransitionView(icon: dev.icon)
-             .environmentObject(OccasionsViewModel())
      }
  }
  */
@@ -51,7 +50,7 @@ struct StoriesWithoutIconsView: View {
 struct NoIconsCardDetailsView: View {
     @Binding var icon: IconModel?
     let story: Story
-    @EnvironmentObject var vm: OccasionsViewModel
+    @ObservedObject var vm: OccasionsViewModel
     @State private var showImageViewer = false
     @State private var selectedSaint: IconModel? = nil
     var namespace: Namespace.ID
@@ -59,6 +58,7 @@ struct NoIconsCardDetailsView: View {
     var body: some View {
         if let icon = icon {
             NoIconsCardView(
+                viewModel: vm,
                 icon: icon,
                 iconographer: vm.iconagrapher ?? dev.iconagrapher,
                 stories: story,
@@ -77,7 +77,7 @@ struct NoIconsCardView: View {
     @State private var showView: Bool = false
     @State private var showTest: Bool = false
     @StateObject var viewModel: IconImageViewModel
-    @EnvironmentObject private var occasionViewModel: OccasionsViewModel
+    @ObservedObject private var occasionViewModel: OccasionsViewModel
     let iconographer: Iconagrapher
     let stories: Story
     @Binding var showImageViewer: Bool
@@ -103,8 +103,9 @@ struct NoIconsCardView: View {
     @State private var isDragging = false
     
     
-    init(icon: IconModel, iconographer: Iconagrapher, stories: Story, showImageViewer: Binding<Bool>, selectedSaint: Binding<IconModel?>, namespace: Namespace.ID) {
+    init(viewModel: OccasionsViewModel, icon: IconModel, iconographer: Iconagrapher, stories: Story, showImageViewer: Binding<Bool>, selectedSaint: Binding<IconModel?>, namespace: Namespace.ID) {
         _viewModel = StateObject(wrappedValue: IconImageViewModel(icon: icon))
+        self.occasionViewModel = viewModel
         self.iconographer = iconographer
         self.stories = stories
         self._showImageViewer = showImageViewer
@@ -239,9 +240,8 @@ struct NoIconsCardView: View {
             
             .ignoresSafeArea()
             .halfSheet(showSheet: $openSheet) {
-                StoryDetailView(story: stories)
+                StoryDetailView(story: stories, vm: occasionViewModel)
                     .presentationDetents([.medium, .large])
-                    .environmentObject(occasionViewModel)
             } onDismiss: {}
             .onAppear {
                 withAnimation {

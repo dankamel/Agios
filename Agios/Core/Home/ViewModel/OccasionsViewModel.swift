@@ -8,7 +8,6 @@
 import Foundation
 import Combine
 import SwiftUI
-import WidgetKit
 
 struct DateModel: Identifiable {
     let id: String = UUID().uuidString
@@ -69,6 +68,8 @@ class OccasionsViewModel: ObservableObject {
     @Published var imageScaling: Double = 1
     @Published var searchDate: String = ""
     @Published var showLaunchView: Bool = false
+    @Published var selectedReading: DataReading?
+    @Published var selectedLiturgy: SubSection?
     @Published var showImageView: Bool = false
     @Published var showStory: Bool? = false
     @Published var showReading: Bool? = false
@@ -138,14 +139,12 @@ class OccasionsViewModel: ObservableObject {
         getCopticEvents()
         getPosts()
         getCopticDates()
-        WidgetCenter.shared.reloadAllTimelines()
         
         getCopticDatesCategorized()
     }
 
     
     private func loadSavedDate() {
-        WidgetCenter.shared.reloadAllTimelines()
         let defaults = UserDefaults(suiteName: "group.com.agios")
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
@@ -399,19 +398,18 @@ class OccasionsViewModel: ObservableObject {
     
     func getPosts() {
         guard let url = URL(string: "https://api.agios.co/occasions/get/date/\(date)") else { return }
-        WidgetCenter.shared.reloadAllTimelines()
         Task { @MainActor in
             do {
                 let (data, response) = try await URLSession.shared.data(from: url)
                 let decodedResponse = try handleOutput(response: response, data: data)
-                    await updateUI(with: decodedResponse)
+                await MainActor.run {
+                    updateUI(with: decodedResponse)
+                }
                 DispatchQueue.main.async { [weak self] in
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                         self?.showEventNotLoaded = false
                     }
                 }
-                dailyQuotesViewModel.selectRandomQuote()
-              
             } catch {
                 print("Error fetching data: \(error)")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
@@ -425,7 +423,6 @@ class OccasionsViewModel: ObservableObject {
                 }
             }
         }
-        WidgetCenter.shared.reloadAllTimelines()
     }
     
     func handleOutput(response: URLResponse, data: Data) throws -> Response {
@@ -436,11 +433,7 @@ class OccasionsViewModel: ObservableObject {
         return try JSONDecoder().decode(Response.self, from: data)
     }
     
-    @MainActor
-    func updateUI(with response: Response) async {
-        withAnimation(.spring(response: 0.07, dampingFraction: 0.9, blendDuration: 1)) {
-            self.isLoading = false
-        }
+    func updateUI(with response: Response) {
         self.feast = response.data.name ?? ""
         self.liturgicalInformation = response.data.liturgicalInformation?.replaceCommaWithNewLine
         self.icons = response.data.icons ?? []
@@ -478,6 +471,9 @@ class OccasionsViewModel: ObservableObject {
         }
         
         filterIconsWithSimilarStories()
+        withAnimation(.spring(response: 0.07, dampingFraction: 0.9, blendDuration: 1)) {
+            self.isLoading = false
+        }
     }
     
     // Function to filter icons that share the same or similar story strings, and include unique icons

@@ -23,9 +23,13 @@ struct LaunchView: View {
     @State private var loops: Int = 0
     @Binding var showLaunchView: Bool
     
-    @EnvironmentObject private var vm: OccasionsViewModel
+    @ObservedObject private var vm: OccasionsViewModel
+    init(vm: OccasionsViewModel, showLaunchView: Binding<Bool>) {
+        self.vm = vm
+        _showLaunchView = showLaunchView
+    }
     
-    var body: some View { 
+    var body: some View {
         ZStack(content: {
             Rectangle()
                 .fill(.linearGradient(colors: [
@@ -36,32 +40,10 @@ struct LaunchView: View {
                                       endPoint: .bottom))
                 .opacity(reduceBackgroundOpacity ? 0 : 1)
                 .ignoresSafeArea()
-              
-//            ZStack(content: {
-//                if showLogoText {
-//                    HStack(spacing: 0) {
-//                        ForEach(logoText, id: \.self) { index in
-//                            Text(index)
-//                                .font(.largeTitle)
-//                                .kerning(-1)
-//                                .fontDesign(.rounded)
-//                                .fontWeight(.bold)
-//                                .foregroundStyle(.gray900)
-//                        }
-//                    }
-//                    .transition(AnyTransition.push(from: .leading).animation(.easeIn))
-//                }
-//            })
-//            .offset(x: showLogoText ? 17 : 0)
-//            .animation(.spring(response: 0.35, dampingFraction: 1, blendDuration: 1), value: showLogoText)
-
-            
+                          
             Image("appIcon")
                 .resizable()
                 .frame(width: 149, height: 149, alignment: .center)
-                //.frame(width: showLogoText ? 65 : 170, height: showLogoText ? 65 : 170, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
-                //.offset(x: showLogoText ? -67 : 0)
-                //.scaleEffect(showLogoText ? 1 : 1)
                 .scaleEffect(appOpen ? 1 : showLogoText ? 1.3 : reduceLogo ? 0.44 : 1)
                 .offset(y: moveLogoToTop ? -(UIScreen.main.bounds.height / 2.6) : 0)
                 .opacity(reduceLogoOpacity ? 0 : 1)
@@ -123,9 +105,9 @@ struct LaunchView: View {
     }
 }
 
-#Preview {
-    LaunchView(showLaunchView: .constant(true))
-        .environmentObject(OccasionsViewModel())
-}
+//#Preview {
+//    LaunchView(showLaunchView: .constant(true))
+//        .environmentObject(OccasionsViewModel())
+//}
 
 

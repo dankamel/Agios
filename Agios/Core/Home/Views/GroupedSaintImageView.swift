@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct GroupedSaintImageView: View {
-    @EnvironmentObject private var vm: OccasionsViewModel
+    @ObservedObject private var vm: OccasionsViewModel
     @Binding var selectedSaint: IconModel?
     @Binding var showStory: Bool?
     @State private var showGDView: Bool = false
@@ -18,7 +18,7 @@ struct GroupedSaintImageView: View {
         ZStack {
             ForEach(Array(vm.filteredIcons.enumerated()), id: \.element.id) { index, saint in
                 let reversedIndex = vm.filteredIcons.count - index - 1
-                HomeSaintImageView(namespace: namespace, icon: saint)
+                HomeSaintImageView(occasionViewModel: vm, namespace: namespace, icon: saint)
                     .transition(.scale(scale: 1))
                     .offset(y: CGFloat(reversedIndex) * -70)
                     .scaleEffect(0.98 - (CGFloat(reversedIndex) * 0.15), anchor: .bottom)
@@ -60,12 +60,12 @@ struct GroupedSaintImageView: View {
     }
 }
 
-struct GroupedSaintImageView_Previews: PreviewProvider {
-    @State static var showStory: Bool? = false
-    @Namespace static var namespace
-    
-    static var previews: some View {
-        GroupedSaintImageView(selectedSaint: .constant(dev.icon), showStory: $showStory, namespace: namespace)
-            .environmentObject(OccasionsViewModel())
-    }
-}
+//struct GroupedSaintImageView_Previews: PreviewProvider {
+//    @State static var showStory: Bool? = false
+//    @Namespace static var namespace
+//    
+//    static var previews: some View {
+//        GroupedSaintImageView(selectedSaint: .constant(dev.icon), showStory: $showStory, namespace: namespace)
+//            .environmentObject(OccasionsViewModel())
+//    }
+//}

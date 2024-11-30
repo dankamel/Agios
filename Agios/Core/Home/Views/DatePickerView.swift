@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct DatePickerView: View {
-    @EnvironmentObject private var occasionViewModel: OccasionsViewModel
+    @ObservedObject private var occasionViewModel: OccasionsViewModel
     var namespace: Namespace.ID
     @State private var openDateList: Bool = false
     @State private var datePicker: Date = Date()
@@ -109,13 +109,13 @@ struct DatePickerView: View {
         })
     }
 }
-
-struct DatePickerView_Preview: PreviewProvider {
-    
-    @Namespace static var namespace
-    
-    static var previews: some View {
-        DatePickerView(namespace: namespace)
-            .environmentObject(OccasionsViewModel())
-    }
-}
+//
+//struct DatePickerView_Preview: PreviewProvider {
+//    
+//    @Namespace static var namespace
+//    
+//    static var previews: some View {
+//        DatePickerView(namespace: namespace)
+//            .environmentObject(OccasionsViewModel())
+//    }
+//}

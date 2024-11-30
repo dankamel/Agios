@@ -37,31 +37,19 @@ struct Provider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<DailyIconEntry>) -> Void) {
         Task {
-            let defaults = UserDefaults(suiteName: "group.com.agios")
-            let savedDateString = defaults?.string(forKey: "selectedDate") ?? WidgetService.date // fallback to today
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd"
-            
-            // Parse savedDateString to Date
-            let savedDate = dateFormatter.date(from: savedDateString) ?? Date()
-
-            // Fetch data for the saved date
-            let saint = try? await WidgetService.fetchSaint(for: savedDate)
-            
-            // Prepare the widget entry based on the fetched data
-            let entry: DailyIconEntry
-            if let saint = saint {
-                // Display the icon if available
-                entry = DailyIconEntry(date: savedDate, image: saint.image, description: saint.description)
-            } else {
-                // Show placeholder if no saint data is available
-                entry = DailyIconEntry(date: savedDate, image: UIImage(named: "placeholder")!, description: "\(savedDateString)")
+            guard let saint = try? await WidgetService.fetchSaint() else {
+                return
             }
-
-            // Schedule the next update at midnight
-            let nextUpdate = Calendar.current.nextDate(after: Date(), matching: DateComponents(hour: 0), matchingPolicy: .nextTime) ?? Date().addingTimeInterval(86400)
-
-            // Return the timeline
+            
+            // Create the entry inside the Task
+            let entry = DailyIconEntry(date: Date(),
+                                       image: saint.image,
+                                       description: saint.description)
+            
+            // Schedule the next update for midnight
+            let nextUpdate = Calendar.current.nextDate(after: Date(), matching: DateComponents(hour: 0), matchingPolicy: .nextTime)!
+            
+            // Create the timeline and call the completion inside the Task
             let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
             completion(timeline)
         }
@@ -86,7 +74,7 @@ struct AgiosWidgetEntryView : View {
                     .frame(width: 169, height: 169)
                     .scaleEffect(1.04)
                 
-                Text(entry.description ?? "")
+                Text(entry.description ?? "No image available")
                     .frame(maxWidth: .infinity)
                     .foregroundStyle(.white)
                     .font(.system(size: 12))

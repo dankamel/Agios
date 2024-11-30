@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct UpcomingFeastView: View {
-    @EnvironmentObject var vm: OccasionsViewModel
+    @ObservedObject var vm: OccasionsViewModel
     let notable: Notable
     @State private var animate: Bool = false
     
@@ -104,16 +104,15 @@ struct UpcomingFeastView: View {
     }
 }
 
-#Preview {
-    UpcomingFeastView(notable: Notable(copticDate: "",
-                                       created: "",
-                                       expand: Expand(copticDate: CopticDate(created: nil,
-                                                                             day: "", id: "",
-                                                                             month: "12",
-                                                                             updated: "")),
-                                       id: "123",
-                                       story: "Story",
-                                       title: "title",
-                                       updated: "updated"))
-        .environmentObject(OccasionsViewModel())
-}
+//#Preview {
+//    UpcomingFeastView(notable: Notable(copticDate: "",
+//                                       created: "",
+//                                       expand: Expand(copticDate: CopticDate(created: nil,
+//                                                                             day: "", id: "",
+//                                                                             month: "12",
+//                                                                             updated: "")),
+//                                       id: "123",
+//                                       story: "Story",
+//                                       title: "title",
+//                                       updated: "updated"))
+//}

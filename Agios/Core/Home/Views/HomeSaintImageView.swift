@@ -12,12 +12,15 @@ import Shimmer
 struct HomeSaintImageView: View {
     
     @EnvironmentObject private var viewModel: IconImageViewModel
-    @EnvironmentObject private var occasionViewModel: OccasionsViewModel
+    @ObservedObject private var occasionViewModel: OccasionsViewModel
     var namespace: Namespace.ID
     let icon: IconModel
     
-//    @State private var selectedSaint: IconModel?
-//    @State private var showDetailView: Bool = false
+    init( occasionViewModel: OccasionsViewModel, namespace: Namespace.ID, icon: IconModel) {
+        self.occasionViewModel = occasionViewModel
+        self.namespace = namespace
+        self.icon = icon
+    }
     
     var body: some View {
         ZStack {
@@ -111,11 +114,11 @@ struct HomeSaintImageView: View {
     }
 
 
-struct HomeSaintImageView_Preview: PreviewProvider {
-    @Namespace static var namespace
-    static var previews: some View {
-        HomeSaintImageView(namespace: namespace, icon: dev.icon)
-            .environmentObject(IconImageViewModel(icon: dev.icon))
-            .environmentObject(OccasionsViewModel())
-    }
-}
+//struct HomeSaintImageView_Preview: PreviewProvider {
+//    @Namespace static var namespace
+//    static var previews: some View {
+//        HomeSaintImageView(namespace: namespace, icon: dev.icon)
+//            .environmentObject(IconImageViewModel(icon: dev.icon))
+//            .environmentObject(OccasionsViewModel())
+//    }
+//}

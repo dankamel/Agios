@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AllGroupedIconsView: View {
-    @EnvironmentObject var vm: OccasionsViewModel
+    @ObservedObject var vm: OccasionsViewModel
     @State private var showImageViewer = false
     @State private var selectedSaint: IconModel? = nil
     var namespace: Namespace.ID
@@ -17,7 +17,7 @@ struct AllGroupedIconsView: View {
         ForEach(vm.filteredIconsGroups, id: \.self) { icons in
             ZStack {
                 ForEach(Array(icons.enumerated().reversed()), id: \.element.id) { index, icon in
-                    GroupCardView(icon: icon, iconographer: vm.iconagrapher ?? dev.iconagrapher, stories: vm.getStory(forIcon: icon) ?? dev.story, showImageViewer: $showImageViewer, selectedSaint: $selectedSaint, namespace: namespace)
+                    GroupCardView(occasionViewModel: vm, icon: icon, iconographer: vm.iconagrapher ?? dev.iconagrapher, stories: vm.getStory(forIcon: icon) ?? dev.story, showImageViewer: $showImageViewer, selectedSaint: $selectedSaint, namespace: namespace)
                         .overlay {
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
                                 .opacity(index > 0 ? (CGFloat(index) * 0.5) : 0)
@@ -80,7 +80,7 @@ struct AllGroupedIconsView: View {
 
 
 struct GroupHeroTransitionView: View {
-    @EnvironmentObject var vm: OccasionsViewModel
+    @ObservedObject var vm: OccasionsViewModel
     @State private var showImageViewer = false
     @State private var selectedSaint: IconModel? = nil
     var namespace: Namespace.ID
@@ -88,11 +88,10 @@ struct GroupHeroTransitionView: View {
     var body: some View {
         ZStack(alignment: .center) {
             ForEach(Array(vm.filteredIcons.enumerated().reversed()), id: \.element.id) { index, icon in
-                GroupCardView(icon: icon, iconographer: vm.iconagrapher ?? dev.iconagrapher, stories: vm.getStory(forIcon: icon) ?? dev.story, showImageViewer: $showImageViewer, selectedSaint: $selectedSaint, namespace: namespace)
+                GroupCardView(occasionViewModel: vm, icon: icon, iconographer: vm.iconagrapher ?? dev.iconagrapher, stories: vm.getStory(forIcon: icon) ?? dev.story, showImageViewer: $showImageViewer, selectedSaint: $selectedSaint, namespace: namespace)
                     .scaleEffect(1.0 - (CGFloat(index) * 0.05), anchor: .center)
                     .offset(y: -CGFloat(index) * 13)
                     .allowsHitTesting(index == 0)
-                
             }
         }
     }
@@ -101,7 +100,7 @@ struct GroupHeroTransitionView: View {
 struct GroupCardDetailsView: View {
     @Binding var icon: IconModel?
     let story: Story
-    @EnvironmentObject var vm: OccasionsViewModel
+    @ObservedObject var vm: OccasionsViewModel
     @State private var showImageViewer = false
     @State private var selectedSaint: IconModel? = nil
     var namespace: Namespace.ID
@@ -109,6 +108,7 @@ struct GroupCardDetailsView: View {
     var body: some View {
         if let icon = icon {
             GroupCardView(
+                occasionViewModel: vm,
                 icon: icon,
                 iconographer: vm.iconagrapher ?? dev.iconagrapher,
                 stories: story,
@@ -127,7 +127,7 @@ struct GroupCardView: View {
     @State private var showView: Bool = false
     @State private var showTest: Bool = false
     @StateObject var viewModel: IconImageViewModel
-    @EnvironmentObject private var occasionViewModel: OccasionsViewModel
+    @ObservedObject private var occasionViewModel: OccasionsViewModel
     let iconographer: Iconagrapher
     let stories: Story
     @Binding var showImageViewer: Bool
@@ -155,8 +155,9 @@ struct GroupCardView: View {
     @State private var selectedIconIndex: Int = 0
     @State private var disableScrolling: Bool = false
     
-    init(icon: IconModel, iconographer: Iconagrapher, stories: Story, showImageViewer: Binding<Bool>, selectedSaint: Binding<IconModel?>, namespace: Namespace.ID) {
+    init(occasionViewModel: OccasionsViewModel, icon: IconModel, iconographer: Iconagrapher, stories: Story, showImageViewer: Binding<Bool>, selectedSaint: Binding<IconModel?>, namespace: Namespace.ID) {
         _viewModel = StateObject(wrappedValue: IconImageViewModel(icon: icon))
+        self.occasionViewModel = occasionViewModel
         self.iconographer = iconographer
         self.stories = stories
         self._showImageViewer = showImageViewer
@@ -250,7 +251,7 @@ struct GroupCardView: View {
             //.interactiveDismissDisabled(disableScrolling)
             .ignoresSafeArea()
             .halfSheet(showSheet: $openSheet) {
-                StoryDetailView(story: stories)
+                StoryDetailView(story: stories, vm: occasionViewModel)
                     .presentationDetents([.medium, .large])
                     .environmentObject(occasionViewModel)
             } onDismiss: {

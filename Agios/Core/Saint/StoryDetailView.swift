@@ -10,7 +10,11 @@ import SwiftUI
 struct StoryDetailView: View {
     let story: Story
     @Environment(\.presentationMode) var presentationMode
-    @EnvironmentObject private var vm: OccasionsViewModel
+    @ObservedObject private var vm: OccasionsViewModel
+    init(story: Story, vm: OccasionsViewModel) {
+        self.story = story
+        self.vm = vm
+    }
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -67,8 +71,7 @@ struct StoryDetailView: View {
         return storyText.replacingOccurrences(of: "\n", with: "")
     }
 }
-
-#Preview {
-    StoryDetailView(story: dev.story)
-        .environmentObject(OccasionsViewModel())
-}
+//
+//#Preview {
+//    StoryDetailView(story: dev.story)
+//}

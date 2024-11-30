@@ -12,7 +12,13 @@ struct ReadingsView: View {
     
     let reading: DataReading
     let subsectionTitle: String
-    @EnvironmentObject private var occasionViewModel: OccasionsViewModel
+    @ObservedObject private var occasionViewModel: OccasionsViewModel
+    
+    init(reading: DataReading, subsectionTitle: String, occasionViewModel: OccasionsViewModel) {
+        self.reading = reading
+        self.subsectionTitle = subsectionTitle
+        self.occasionViewModel = occasionViewModel
+    }
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -67,13 +73,8 @@ struct ReadingsView: View {
                                     .padding(20)
                                     .background(.primary200)
                                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                                   
                                 }
                                    
-                                
-                                //Divider()
-                                
-                                // Display the details for each SubSectionReading
                                 ForEach(firstSubSection.readings ?? []) { reading in
                                     VStack(alignment: .leading, spacing: 16) {
                                         // Display each passage in a separate view
@@ -90,7 +91,6 @@ struct ReadingsView: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 24)
                 }
-
             }
         }
         .kerning(-0.4)
@@ -107,7 +107,8 @@ struct PassageDetailView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             // Display bookTranslation and ref
-            if let bookTranslation = passage.bookTranslation, let ref = passage.ref {
+            if let bookTranslation = passage.bookTranslation,
+               let ref = passage.ref {
                 HStack {
                     Text("\(bookTranslation) \(ref)")
                         .font(.title)
@@ -229,13 +230,10 @@ struct LiturgyReadingDetailsView: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 24)
                 }
-
             }
         }
         .kerning(-0.4)
         .foregroundStyle(.gray900)
         .fontDesign(.rounded)
-
-
     }
 }

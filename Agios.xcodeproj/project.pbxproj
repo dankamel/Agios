@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		474C79A52BD009BC003E3A15 /* AgiosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 474C79A42BD009BC003E3A15 /* AgiosApp.swift */; };
-		474C79A72BD009BC003E3A15 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 474C79A62BD009BC003E3A15 /* ContentView.swift */; };
 		474C79A92BD009BF003E3A15 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 474C79A82BD009BF003E3A15 /* Assets.xcassets */; };
 		474C79AC2BD009BF003E3A15 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 474C79AB2BD009BF003E3A15 /* Preview Assets.xcassets */; };
 		5701B0C62C5C5AAA00592193 /* PreferenceKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5701B0C52C5C5AAA00592193 /* PreferenceKey.swift */; };
@@ -46,7 +45,6 @@
 		579710A82BD1429900DFDBA3 /* Date+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579710A32BD1429900DFDBA3 /* Date+Extensions.swift */; };
 		579710A92BD1429900DFDBA3 /* Image+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579710A42BD1429900DFDBA3 /* Image+Extensions.swift */; };
 		579710AB2BD142EB00DFDBA3 /* ReadingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579710AA2BD142EB00DFDBA3 /* ReadingsView.swift */; };
-		579710B02BD1449000DFDBA3 /* SynaxarsDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579710AF2BD1449000DFDBA3 /* SynaxarsDetailsView.swift */; };
 		579710B72BD146A100DFDBA3 /* IconModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579710B22BD146A100DFDBA3 /* IconModel.swift */; };
 		579710B82BD146A100DFDBA3 /* PsalmAndGospel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579710B32BD146A100DFDBA3 /* PsalmAndGospel.swift */; };
 		579710B92BD146A100DFDBA3 /* Synaxar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579710B42BD146A100DFDBA3 /* Synaxar.swift */; };
@@ -116,7 +114,6 @@
 /* Begin PBXFileReference section */
 		474C79A12BD009BC003E3A15 /* Agios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Agios.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		474C79A42BD009BC003E3A15 /* AgiosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgiosApp.swift; sourceTree = "<group>"; };
-		474C79A62BD009BC003E3A15 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		474C79A82BD009BF003E3A15 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		474C79AB2BD009BF003E3A15 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		5701B0C52C5C5AAA00592193 /* PreferenceKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferenceKey.swift; sourceTree = "<group>"; };
@@ -155,7 +152,6 @@
 		579710A32BD1429900DFDBA3 /* Date+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Date+Extensions.swift"; sourceTree = "<group>"; };
 		579710A42BD1429900DFDBA3 /* Image+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Image+Extensions.swift"; sourceTree = "<group>"; };
 		579710AA2BD142EB00DFDBA3 /* ReadingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingsView.swift; sourceTree = "<group>"; };
-		579710AF2BD1449000DFDBA3 /* SynaxarsDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynaxarsDetailsView.swift; sourceTree = "<group>"; };
 		579710B22BD146A100DFDBA3 /* IconModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IconModel.swift; sourceTree = "<group>"; };
 		579710B32BD146A100DFDBA3 /* PsalmAndGospel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PsalmAndGospel.swift; sourceTree = "<group>"; };
 		579710B42BD146A100DFDBA3 /* Synaxar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Synaxar.swift; sourceTree = "<group>"; };
@@ -245,7 +241,6 @@
 				5704F0982CE126BC001C17C7 /* Agios.entitlements */,
 				99B5998A2C2E03B5000F6307 /* Info.plist */,
 				474C79A42BD009BC003E3A15 /* AgiosApp.swift */,
-				474C79A62BD009BC003E3A15 /* ContentView.swift */,
 				570515C02BDB035F00990A24 /* Components */,
 				5797106A2BD1385900DFDBA3 /* Core */,
 				579710742BD13AD900DFDBA3 /* Domain */,
@@ -403,7 +398,6 @@
 			isa = PBXGroup;
 			children = (
 				579710AA2BD142EB00DFDBA3 /* ReadingsView.swift */,
-				579710AF2BD1449000DFDBA3 /* SynaxarsDetailsView.swift */,
 				570515C32BDB186F00990A24 /* DailyReadingView.swift */,
 				99B5EA7C2C373B7700FE829F /* ReadingView.swift */,
 				5701B0CA2C5C6AB800592193 /* SheetModal.swift */,
@@ -687,7 +681,6 @@
 				570764412BD68EDA00C5C98B /* DeveloperPreview.swift in Sources */,
 				579710AB2BD142EB00DFDBA3 /* ReadingsView.swift in Sources */,
 				5797106F2BD138E400DFDBA3 /* HomeView.swift in Sources */,
-				474C79A72BD009BC003E3A15 /* ContentView.swift in Sources */,
 				579710BA2BD146A100DFDBA3 /* PresentableSection.swift in Sources */,
 				5739B0DC2C1645D500493B4F /* SaintGroupImageView.swift in Sources */,
 				570515BE2BDAE14700990A24 /* SaintImageView.swift in Sources */,
@@ -701,7 +694,6 @@
 				570515C22BDB037300990A24 /* NavigationButton.swift in Sources */,
 				5791383B2C3FFB45008A6E3A /* HeroTransitionView.swift in Sources */,
 				578B61142BD164A900DCDFF6 /* ReadingsColours.swift in Sources */,
-				579710B02BD1449000DFDBA3 /* SynaxarsDetailsView.swift in Sources */,
 				57A440252C3EFD3600CD6C25 /* Hero.swift in Sources */,
 				570515C42BDB186F00990A24 /* DailyReadingView.swift in Sources */,
 				5701B0C62C5C5AAA00592193 /* PreferenceKey.swift in Sources */,

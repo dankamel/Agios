@@ -7,7 +7,6 @@
 
 import Foundation
 import UIKit
-import WidgetKit
 
 struct WidgetService {
     enum WidgetServiceError: Error {
@@ -44,44 +43,29 @@ struct WidgetService {
         cachedDescription != nil
     }
     
-    static func fetchSaint(for date: Date) async throws -> Saint? {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        let dateString = formatter.string(from: date)
-        
-        guard let url = URL(string: "https://api.agios.co/occasions/get/date/\(dateString)") else {
+    static func fetchSaint() async throws -> Saint? {
+        guard let url = URL(string: "https://api.agios.co/occasions/get/date/\(WidgetService.date)")
+        else {
             return nil
         }
         
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             let response = try? JSONDecoder().decode(Response.self, from: data)
-            
-            guard let icon = response?.data.icons?.first else {
-                print("No icon data available.")
-                return Saint(image: UIImage(named: "placeholder")!, description: "\(date.formatted(date: .abbreviated, time: .omitted))")
+            let icon = response?.data.icons?.first
+            let description = icon?.caption ?? ""
+            var imageUrl: String?
+            if let croppedImage = icon?.croppedImage,
+               let image = icon?.image {
+                if !croppedImage.isEmpty {
+                    imageUrl = croppedImage
+                } else if !image.isEmpty {
+                    imageUrl = image
+                }
             }
             
-            let description = icon.caption ?? "\(date.formatted(date: .abbreviated, time: .omitted))"
-            
-            var imageUrl = ""
-            if let croppedImage = icon.croppedImage,
-               !croppedImage.isEmpty {
-                print("using cropped image")
-                imageUrl = croppedImage
-            } else {
-                print("using full image")
-                imageUrl = icon.image
-            }
-            guard let imageDownloadURL = URL(string: imageUrl),
-                  ["jpeg", "jpg", "png"].contains(imageDownloadURL.pathExtension.lowercased()) else {
-                print("Image URL is invalid or format is unsupported.")
-                return Saint(image: UIImage(named: "placeholder")!, description: description)
-            }
-            
-            // Fetch the image data
-            do {
-                let (imageData, _) = try await URLSession.shared.data(from: imageDownloadURL)
+            if let imageUrl, !imageUrl.isEmpty {
+                let (imageData, _) = try await URLSession.shared.data(from: URL(string: imageUrl)!)
                 guard let image = UIImage(data: imageData) else {
                     throw WidgetServiceError.imageDataCorrupted
                 }
@@ -92,12 +76,11 @@ struct WidgetService {
                 }
                 
                 return Saint(image: image, description: description)
-            } catch {
-                print("Failed to fetch or decode image data: \(error)")
-                return Saint(image: UIImage(named: "placeholder")!, description: description)
             }
+            
+            return Saint(image: UIImage(named: "placeholder")!, description: "")
         } catch {
-            print("Failed to fetch icon data from API: \(error)")
+            print("Error fetching icon: \(error)")
             return nil
         }
     }

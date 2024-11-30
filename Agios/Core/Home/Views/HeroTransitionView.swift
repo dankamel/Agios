@@ -9,7 +9,7 @@ import SwiftUI
 import Shimmer
 
 struct HeroTransitionView: View {
-    @EnvironmentObject var occasionViewModel: OccasionsViewModel
+    @ObservedObject var occasionViewModel: OccasionsViewModel
     @State private var showImageViewer = false
     @State private var selectedSaint: IconModel? = nil
     var namespace: Namespace.ID
@@ -18,7 +18,7 @@ struct HeroTransitionView: View {
         ScrollView(.horizontal) {
             HStack {
                 ForEach(occasionViewModel.icons) { icon in
-                    CardView(icon: icon, iconographer: occasionViewModel.iconagrapher ?? dev.iconagrapher, stories: occasionViewModel.getStory(forIcon: icon) ?? dev.story, showImageViewer: $showImageViewer, selectedSaint: $selectedSaint, namespace: namespace)
+                    CardView(viewModel: occasionViewModel, icon: icon, iconographer: occasionViewModel.iconagrapher ?? dev.iconagrapher, stories: occasionViewModel.getStory(forIcon: icon) ?? dev.story, showImageViewer: $showImageViewer, selectedSaint: $selectedSaint, namespace: namespace)
                     
                 }
             }
@@ -32,7 +32,6 @@ struct HeroTransitionView: View {
  #Preview {
      HeroWrapper {
          HeroTransitionView(icon: dev.icon)
-             .environmentObject(OccasionsViewModel())
      }
  }
  */
@@ -40,7 +39,7 @@ struct HeroTransitionView: View {
 struct CardDetailsView: View {
     @Binding var icon: IconModel?
     let story: Story
-    @EnvironmentObject var vm: OccasionsViewModel
+    @ObservedObject var vm: OccasionsViewModel
     @State private var showImageViewer = false
     @State private var selectedSaint: IconModel? = nil
     var namespace: Namespace.ID
@@ -48,6 +47,7 @@ struct CardDetailsView: View {
     var body: some View {
         if let icon = icon {
             CardView(
+                viewModel: vm,
                 icon: icon,
                 iconographer: vm.iconagrapher ?? dev.iconagrapher,
                 stories: story,
@@ -66,7 +66,7 @@ struct CardView: View {
     @State private var showView: Bool = false
     @State private var showTest: Bool = false
     @StateObject var viewModel: IconImageViewModel
-    @EnvironmentObject private var occasionViewModel: OccasionsViewModel
+    @ObservedObject private var occasionViewModel: OccasionsViewModel
     let iconographer: Iconagrapher
     let stories: Story
     @Binding var showImageViewer: Bool
@@ -92,8 +92,9 @@ struct CardView: View {
     @State private var isDragging = false
     
     
-    init(icon: IconModel, iconographer: Iconagrapher, stories: Story, showImageViewer: Binding<Bool>, selectedSaint: Binding<IconModel?>, namespace: Namespace.ID) {
+    init(viewModel: OccasionsViewModel, icon: IconModel, iconographer: Iconagrapher, stories: Story, showImageViewer: Binding<Bool>, selectedSaint: Binding<IconModel?>, namespace: Namespace.ID) {
         _viewModel = StateObject(wrappedValue: IconImageViewModel(icon: icon))
+        self.occasionViewModel = viewModel
         self.iconographer = iconographer
         self.stories = stories
         self._showImageViewer = showImageViewer
@@ -228,9 +229,8 @@ struct CardView: View {
             
             .ignoresSafeArea()
             .halfSheet(showSheet: $openSheet) {
-                StoryDetailView(story: stories)
+                StoryDetailView(story: stories, vm: occasionViewModel)
                     .presentationDetents([.medium, .large])
-                    .environmentObject(occasionViewModel)
             } onDismiss: {}
             .onAppear {
                 withAnimation {
