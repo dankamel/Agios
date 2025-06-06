@@ -104,10 +104,3 @@ struct LaunchView: View {
         }
     }
 }
-
-//#Preview {
-//    LaunchView(showLaunchView: .constant(true))
-//        .environmentObject(OccasionsViewModel())
-//}
-
-

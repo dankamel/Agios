@@ -127,19 +127,9 @@ struct DateView: View {
                 .opacity(openCopticList ? 1 : 0)
                 .animation(.spring(response: 0.4, dampingFraction: 1), value: animationsMode)
             }
-            //.padding(.horizontal, 16)
             .foregroundStyle(.gray900)
             .fontWeight(.medium)
             .fontDesign(.rounded)
-            
-            // Gradient
-            /*
-             Rectangle()
-                     .fill(.linearGradient(colors: [.white, .clear], startPoint: .bottom, endPoint: .top))
-                     .frame(height: 40)
-             */
-        
-            
         }
         
         .overlay(alignment: .topLeading) {
@@ -239,13 +229,21 @@ struct FeastView: View {
         }
     }
     
-    var searchedDates: [String] {
+    var searchedDatesFromAllMonths: [String] {
+        let dataSource = !occasionViewModel.allCopticMonths.isEmpty ? occasionViewModel.allCopticMonths : filteredDates
+        
+        let allDates = dataSource.flatMap { month in
+            month.dates.map { date in
+                "\(date)"
+            }
+        }
+        
         if occasionViewModel.searchDate.isEmpty {
-            return occasionViewModel.copticDates
+            return allDates
         } else {
-            return occasionViewModel.copticDates.filter { date in
-
-                return date.lowercased().contains(occasionViewModel.searchDate.lowercased())
+            let searchTerm = occasionViewModel.searchDate.trimmingCharacters(in: .whitespacesAndNewlines)
+            return allDates.filter { dateString in
+                return dateString.lowercased().contains(searchTerm.lowercased())
             }
         }
     }
@@ -448,7 +446,7 @@ struct FeastView: View {
                         }
                     } else {
                         ZStack {
-                            if searchedDates.isEmpty {
+                            if searchedDatesFromAllMonths.isEmpty {
                                 VStack(spacing: -8, content: {
                                     LottieView(animation: .named("search-a.json"))
                                         .playbackMode(.playing(.toProgress(1, loopMode: .loop)))
@@ -465,7 +463,7 @@ struct FeastView: View {
                                 .padding(.top, 40)
                             } else {
                                 VStack(spacing: 8) {
-                                    ForEach(searchedDates, id: \.self) { date in
+                                    ForEach(searchedDatesFromAllMonths, id: \.self) { date in
                                         Button {
                                             withAnimation(.spring(response: 0.25, dampingFraction: 0.88)) {
                                                 occasionViewModel.copticDateTapped = false

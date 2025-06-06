@@ -11,7 +11,7 @@ import WidgetKit
 
 @main
 struct AgiosApp: App {
-    @State private var occasionViewModel: OccasionsViewModel? = nil
+    @State private var occasionViewModel: OccasionsViewModel? = OccasionsViewModel()
     @StateObject private var versionVM = VersionCheckViewModel()
     @State private var showForceAlert = false
 
@@ -66,9 +66,10 @@ struct AgiosApp: App {
                             await versionVM.performVersionCheck()
                             if versionVM.updateType == .force {
                                 showForceAlert = true
+                                occasionViewModel = nil
                             } else {
                                 // ✅ Only initialize it *after* version check passes
-                                occasionViewModel = OccasionsViewModel()
+                                occasionViewModel = occasionViewModel
                             }
                         }
 

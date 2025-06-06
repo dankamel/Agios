@@ -121,7 +121,6 @@ struct HomeView: View {
                         }
                         .allowsHitTesting(occasionViewModel.disallowTapping ? false : true)
                         .scrollIndicators(.hidden)
-                        //.scrollDisabled(occasionViewModel.copticDateTapped || occasionViewModel.defaultDateTapped || occasionViewModel.isLoading ? true : false)
                         .scaleEffect(occasionViewModel.defaultDateTapped || occasionViewModel.viewState == .expanded || occasionViewModel.viewState == .imageView ? 0.98 : 1)
                         .blur(radius: occasionViewModel.defaultDateTapped || occasionViewModel.viewState == .expanded || occasionViewModel.viewState == .imageView ? 3 : 0)
                         
@@ -147,110 +146,6 @@ struct HomeView: View {
                         if occasionViewModel.defaultDateTapped {
                             DateView(occasionViewModel: occasionViewModel, transition: transition)
                                 .offset(y: -keyboardHeight/2.4)
-                            //.transition(.blurReplace)
-                        }
-                    }
-                    
-                    
-                    // This controls switching between the home view and single saint / icon details views.
-                    ZStack {
-                        switch occasionViewModel.viewState {
-                            case .expanded:
-                                DetailLoadingView(icon: $selectedIcon, viewModel: occasionViewModel, story: occasionViewModel.getStory(forIcon: selectedIcon ?? dev.icon) ?? dev.story, namespace: namespace)
-                                    .scaleEffect(1 + startValue)
-                                    .offset(x: startValue > 0.2 ? offset.width + position.width : .zero, y: startValue > 0 ? offset.height + position.height : .zero)
-                                    .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("MagnifyGestureScaleChanged"))) { obj in
-                                        if let scale = obj.object as? CGFloat {
-                                            withAnimation {
-                                                currentScale = scale
-                                            }
-                                        }
-                                    }
-                                    .offset(offset)
-                                    .scaleEffect(getScaleAmount())
-                                    .simultaneousGesture(
-                                        !occasionViewModel.stopDragGesture ?
-                                        DragGesture()
-                                            .onChanged { value in
-                                                let dragThreshold: CGFloat = 100
-                                                
-                                                switch dragPhase {
-                                                    case .initial:
-                                                        if abs(value.translation.width) > abs(value.translation.height) && value.translation.width > 0 {
-                                                            // Initial phase: restrict to left-to-right dragging
-                                                            withAnimation {
-                                                                offset = CGSize(width: value.translation.width, height: .zero)
-                                                            }
-                                                            
-                                                            if abs(value.translation.width) > dragThreshold {
-                                                                dragPhase = .unrestricted
-                                                                HapticsManager.instance.impact(style: .light)
-                                                                hapticsTriggered = true
-                                                            }
-                                                        }
-                                                    case .unrestricted:
-                                                        // Unrestricted phase: allow dragging in all directions
-                                                        withAnimation {
-                                                            offset = value.translation
-                                                        }
-                                                        
-                                                        if !hapticsTriggered && (abs(value.translation.width) > dragThreshold || abs(value.translation.height) > dragThreshold) {
-                                                            HapticsManager.instance.impact(style: .light)
-                                                            hapticsTriggered = true
-                                                        }
-                                                }
-                                            }
-                                            .onEnded { value in
-                                                let dragThreshold: CGFloat = 100
-                                                
-                                                switch dragPhase {
-                                                    case .initial:
-                                                        if value.translation.width > 0 && abs(value.translation.width) > dragThreshold {
-                                                            withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
-                                                                occasionViewModel.viewState = .collapsed
-                                                                offset = .zero
-                                                                selectedSaint = nil
-                                                                occasionViewModel.selectedSaint = nil
-                                                            }
-                                                            occasionViewModel.disallowTapping = true
-                                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.62) {
-                                                                occasionViewModel.disallowTapping = false
-                                                            }
-                                                        } else {
-                                                            withAnimation(.spring(response: 0.35, dampingFraction: 1)) {
-                                                                offset = .zero
-                                                            }
-                                                        }
-                                                    case .unrestricted:
-                                                        if abs(value.translation.width) > dragThreshold || abs(value.translation.height) > dragThreshold {
-                                                            withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
-                                                                occasionViewModel.viewState = .collapsed
-                                                                offset = .zero
-                                                                selectedSaint = nil
-                                                                occasionViewModel.selectedSaint = nil
-                                                            }
-                                                            occasionViewModel.disallowTapping = true
-                                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.62) {
-                                                                occasionViewModel.disallowTapping = false
-                                                            }
-                                                        } else {
-                                                            withAnimation(.spring(response: 0.35, dampingFraction: 1)) {
-                                                                offset = .zero
-                                                            }
-                                                        }
-                                                }
-                                                
-                                                // Reset the drag phase and haptics triggered state after dragging ends
-                                                dragPhase = .initial
-                                                hapticsTriggered = false
-                                            }
-                                        : nil
-                                    )
-                            case .collapsed:
-                                EmptyView()
-                            case .imageView:
-                                GroupedDetailLoadingView(viewModel: occasionViewModel, icon: selectedSaint, story: occasionViewModel.getStory(forIcon: occasionViewModel.filteredIcons.first ?? dev.icon) ?? dev.story, selectedSaint: $selectedSaint, namespace: namespace)
-                                    .transition(.scale(scale: 1))
                         }
                     }
                     
@@ -263,7 +158,6 @@ struct HomeView: View {
                             }
                         }
                 }
-                //.ignoresSafeArea(edges: .all)
                 
                 // Pop up for when data doesn't load in view
                 ZStack {
@@ -352,19 +246,6 @@ struct HomeView: View {
         showGDView.toggle()
     }
 }
-    
-//    struct HomeView_Preview: PreviewProvider {
-//        
-//        @Namespace static var namespace
-//        @Namespace static var transition
-//
-//    static var previews: some View {
-//        HeroWrapper {
-//            HomeView(namespace: namespace, transition: transition)
-//                .environmentObject(OccasionsViewModel())
-//                .environmentObject(IconImageViewModel(icon: dev.icon))
-//        }
-//    }
 
 extension HomeView {
     private var combinedDateView: some View {
@@ -390,8 +271,8 @@ extension HomeView {
                             .frame(width: 1, height: 17)
                         
                         HStack(spacing: 4) {
-                            Text("\(occasionViewModel.newCopticDate?.month ?? "") \(occasionViewModel.newCopticDate?.day ?? "")")
-                                .lineLimit(1)
+                            Text("\(occasionViewModel.newCopticDate?.month ?? "") \(occasionViewModel.newCopticDate?.day ?? "")   ")
+                                //.lineLimit(1)
                                 .foregroundStyle(.primary1000)
                                 .multilineTextAlignment(.leading)
                             
@@ -614,16 +495,9 @@ extension HomeView {
                                         .lineLimit(6)
                                         .background(.white)
                                         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                                    //.scaleEffect(selectedCommemoration == reading ? 1.05 : 1.0)
-                                    //.animation(.spring(response: 0.6, dampingFraction: 0.4))
                                         .onTapGesture {
-                                            withAnimation() {
-                                                //selectedCommemoration = reading
-                                            }
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                                                 withAnimation {
-                                                    //selectedCommemoration = nil
-                                                    //self.reading = reading
                                                     showSynaxars = true
                                                 }
                                             }
